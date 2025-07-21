@@ -173,6 +173,10 @@ function ManageSubscription() {
           </form>
         </CardContent>
       </Card>
+
+      <h1 className="text-lg lg:text-2xl font-medium text-gray-900 mb-6">
+          Plan
+      </h1>
       <Suspense fallback={<SubscriptionSkeleton />}>
         <ManageSubscription />
       </Suspense>

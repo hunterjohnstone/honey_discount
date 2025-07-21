@@ -1,287 +1,424 @@
-'use client';
+// pages/discover.tsx
+"use client";
+import { useState, useEffect } from 'react';
+import Head from 'next/head';
 
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter
-} from '@/components/ui/card';
-import { customerPortalAction } from '@/lib/payments/actions';
-import { useActionState } from 'react';
-import { TeamDataWithMembers, User } from '@/lib/db/schema';
-import { removeTeamMember, inviteTeamMember } from '@/app/(login)/actions';
-import useSWR from 'swr';
-import { Suspense } from 'react';
-import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Loader2, PlusCircle } from 'lucide-react';
-
-type ActionState = {
-  error?: string;
-  success?: string;
+type Promotion = {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  category: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  isActive: boolean;
 };
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-function SubscriptionSkeleton() {
-  return (
-    <Card className="mb-8 h-[140px]">
-      <CardHeader>
-        <CardTitle>Discovery</CardTitle>
-      </CardHeader>
-    </Card>
-  );
+type InputPromotionSchema = { //price is a string
+  id: string;
+  title: string;
+  description: string;
+  price: string;
+  imageUrl: string;
+  category: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  isActive: boolean;
 }
 
-function ManageSubscription() {
-  const { data: teamData } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
-
-  return (
-    <Card className="mb-8">
-      <CardHeader>
-        <CardTitle>Team Subscription</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-            <div className="mb-4 sm:mb-0">
-              <p className="font-medium">
-                Current Plan: {teamData?.planName || 'Free'}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {teamData?.subscriptionStatus === 'active'
-                  ? 'Billed monthly'
-                  : teamData?.subscriptionStatus === 'trialing'
-                  ? 'Trial period'
-                  : 'No active subscription'}
-              </p>
-            </div>
-            <form action={customerPortalAction}>
-              <Button type="submit" variant="outline">
-                Manage Subscription
-              </Button>
-            </form>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+type ValidatedPromotionSchema = { //price is a number
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  category: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  isActive: boolean;
 }
 
-function TeamMembersSkeleton() {
-  return (
-    <Card className="mb-8 h-[140px]">
-      <CardHeader>
-        <CardTitle>Team Members</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="animate-pulse space-y-4 mt-1">
-          <div className="flex items-center space-x-4">
-            <div className="size-8 rounded-full bg-gray-200"></div>
-            <div className="space-y-2">
-              <div className="h-4 w-32 bg-gray-200 rounded"></div>
-              <div className="h-3 w-14 bg-gray-200 rounded"></div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+const DiscoverPage = () => {
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [filteredPromotions, setFilteredPromotions] = useState<Promotion[]>([]);
+  const [isEmployer, setIsEmployer] = useState(false);
+  const [isAddingPromotion, setIsAddingPromotion] = useState(false);
+  const [newPromotion, setNewPromotion] = useState<Omit<ValidatedPromotionSchema, 'id' | 'isActive'>>({
+    title: '',
+    description: '',
+    price: 0,
+    imageUrl: '',
+    category: 'food',
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    location: '',
+  });
 
-function TeamMembers() {
-  const { data: teamData } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
-  const [removeState, removeAction, isRemovePending] = useActionState<
-    ActionState,
-    FormData
-  >(removeTeamMember, {});
+  // Filters
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100]);
+  const [locationFilter, setLocationFilter] = useState<string>('all');
 
-  const getUserDisplayName = (user: Pick<User, 'id' | 'name' | 'email'>) => {
-    return user.name || user.email || 'Unknown User';
+  useEffect(() => {
+    // Simulate fetching promotions from an API
+    const mockPromotions: Promotion[] = [
+      {
+        id: '1',
+        title: 'Weekend Brunch Special',
+        description: '20% off all brunch stuff',
+        price: 25,
+        imageUrl: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+        category: 'food',
+        startDate: '2023-06-01',
+        endDate: '2023-06-30',
+        location: 'granada',
+        isActive: true,
+      },
+      {
+        id: '2',
+        title: 'Summer Fitness Package',
+        description: '3 months of gym membership half price.',
+        price: 120,
+        imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+        category: 'fitness',
+        startDate: '2023-06-15',
+        endDate: '2023-08-31',
+        location: 'sevilla',
+        isActive: true,
+      },
+      {
+        id: '3',
+        title: 'Tech Gadgets Sale',
+        description: '30% off electronics.',
+        price: 299,
+        imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+        category: 'electronics',
+        startDate: '2023-06-10',
+        endDate: '2023-06-20',
+        location: 'madrid',
+        isActive: true,
+      },
+    ];
+    setPromotions(mockPromotions);
+    setFilteredPromotions(mockPromotions);
+
+    // Check if user is an employer (in a real app, this would come from auth context)
+    setIsEmployer(false); // Change to true to see employer features
+  }, []);
+
+  useEffect(() => {
+    // Apply filters
+    let results = [...promotions];
+    
+    if (categoryFilter !== 'all') {
+      results = results.filter(p => p.category === categoryFilter);
+    }
+    
+    if (locationFilter !== 'all') {
+      results = results.filter(p => p.location === locationFilter);
+    }
+    
+    results = results.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+    
+    setFilteredPromotions(results);
+  }, [categoryFilter, locationFilter, priceRange, promotions]);
+
+  const handleAddPromotion = () => {
+    // TODO: send this data to the API which stores information in the postgres DB
+    // In a real app, this would call an API
+    const promotionToAdd: Promotion = {
+      ...newPromotion,
+      id: Math.random().toString(36).substring(2, 9),
+      isActive: true,
+    };
+    
+    setPromotions([...promotions, promotionToAdd]);
+    setIsAddingPromotion(false);
+    setNewPromotion({
+      title: '',
+      description: '',
+      price: 0,
+      imageUrl: '',
+      category: 'food',
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      location: '',
+    });
   };
 
-  if (!teamData?.teamMembers?.length) {
-    return (
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Team Members</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">No team members yet.</p>
-        </CardContent>
-      </Card>
-    );
-  }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setNewPromotion({
+      ...newPromotion,
+      [name]: name === 'price' ? parseFloat(value) : value,
+    });
+  };
 
   return (
-    <Card className="mb-8">
-      <CardHeader>
-        <CardTitle>Team Members</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ul className="space-y-4">
-          {teamData.teamMembers.map((member, index) => (
-            <li key={member.id} className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Avatar>
-                  {/* 
-                    This app doesn't save profile images, but here
-                    is how you'd show them:
+    <div className="min-h-screen bg-gray-50">
+      <Head>
+        <title>Discover Promotions</title>
+        <meta name="description" content="Find the latest promotions and deals" />
+      </Head>
 
-                    <AvatarImage
-                      src={member.user.image || ''}
-                      alt={getUserDisplayName(member.user)}
-                    />
-                  */}
-                  <AvatarFallback>
-                    {getUserDisplayName(member.user)
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')}
-                  </AvatarFallback>
-                </Avatar>
+      <main className="container mx-auto py-8 px-4">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">Discover Promotions</h1>
+          {/* //TODO: UPDATE SO ONLY CERTAIN USERNAMES CAN ADD PROMOTIONS */}
+          {
+            <button
+              onClick={() => setIsAddingPromotion(true)}
+              className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Add New Promotion
+            </button>
+          }
+        </div>
+
+        {/* Filters */}
+        <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">Filters</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="all">All Categories</option>
+                <option value="food">Food & Dining</option>
+                <option value="fitness">Fitness</option>
+                <option value="electronics">Electronics</option>
+                <option value="retail">Retail</option>
+                <option value="services">Services</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+              <select
+                value={locationFilter}
+                onChange={(e) => setLocationFilter(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="all">All Locations</option>
+                <option value="granada">Granada</option>
+                <option value="sevilla">Sevilla</option>
+                <option value="madrid">Madrid</option>
+                <option value="suburbs">Suburbs</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Price Range: ${priceRange[0]} - ${priceRange[1]}
+              </label>
+              <div className="flex items-center space-x-4">
+                <input
+                  type="range"
+                  min="0"
+                  max="500"
+                  step="5"
+                  value={priceRange[1]}
+                  onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Add Promotion Modal */}
+        {isAddingPromotion && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">Add New Promotion</h2>
+              
+              <div className="space-y-4">
                 <div>
-                  <p className="font-medium">
-                    {getUserDisplayName(member.user)}
-                  </p>
-                  <p className="text-sm text-muted-foreground capitalize">
-                    {member.role}
-                  </p>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={newPromotion.title}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    placeholder="Promotion title"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    name="description"
+                    value={newPromotion.description}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    rows={3}
+                    placeholder="Detailed description of the promotion"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                    <input
+                      type="number"
+                      name="price"
+                      value={newPromotion.price}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select
+                      name="category"
+                      value={newPromotion.category}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="food">Food & Dining</option>
+                      <option value="fitness">Fitness</option>
+                      <option value="electronics">Electronics</option>
+                      <option value="retail">Retail</option>
+                      <option value="services">Services</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                    <input
+                      type="date"
+                      name="startDate"
+                      value={newPromotion.startDate}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                    <input
+                      type="date"
+                      name="endDate"
+                      value={newPromotion.endDate}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                  <select
+                    name="location"
+                    value={newPromotion.location}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="granada">Granada</option>
+                    <option value="sevilla">seville</option>
+                    <option value="madrid">Madrid</option>
+                    <option value="suburbs">Suburbs</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                  <input
+                    type="text"
+                    name="imageUrl"
+                    value={newPromotion.imageUrl}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    placeholder="https://example.com/image.jpg"
+                  />
                 </div>
               </div>
-              {index > 1 ? (
-                <form action={removeAction}>
-                  <input type="hidden" name="memberId" value={member.id} />
-                  <Button
-                    type="submit"
-                    variant="outline"
-                    size="sm"
-                    disabled={isRemovePending}
-                  >
-                    {isRemovePending ? 'Removing...' : 'Remove'}
-                  </Button>
-                </form>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-        {removeState?.error && (
-          <p className="text-red-500 mt-4">{removeState.error}</p>
+              
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => setIsAddingPromotion(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddPromotion}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  Add Promotion
+                </button>
+              </div>
+            </div>
+          </div>
         )}
-      </CardContent>
-    </Card>
-  );
-}
 
-function InviteTeamMemberSkeleton() {
-  return (
-    <Card className="h-[260px]">
-      <CardHeader>
-        <CardTitle>Invite Team Member</CardTitle>
-      </CardHeader>
-    </Card>
-  );
-}
-
-function InviteTeamMember() {
-  const { data: user } = useSWR<User>('/api/user', fetcher);
-  const isOwner = user?.role === 'owner';
-  const [inviteState, inviteAction, isInvitePending] = useActionState<
-    ActionState,
-    FormData
-  >(inviteTeamMember, {});
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Invite Team Member</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form action={inviteAction} className="space-y-4">
-          <div>
-            <Label htmlFor="email" className="mb-2">
-              Email
-            </Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="Enter email"
-              required
-              disabled={!isOwner}
-            />
+        {/* Promotions Grid */}
+        {filteredPromotions.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPromotions.map((promotion) => (
+              <div key={promotion.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="h-48 overflow-hidden">
+                  <img
+                    src={promotion.imageUrl}
+                    alt={promotion.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-xl font-semibold text-gray-800">{promotion.title}</h3>
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">
+                      ${promotion.price}
+                    </span>
+                  </div>
+                  <p className="text-gray-600 mb-3">{promotion.description}</p>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
+                      {promotion.category}
+                    </span>
+                    <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
+                      {promotion.location}
+                    </span>
+                    <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
+                      {new Date(promotion.endDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-          <div>
-            <Label>Role</Label>
-            <RadioGroup
-              defaultValue="member"
-              name="role"
-              className="flex space-x-4"
-              disabled={!isOwner}
+        ) : (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-medium text-gray-600">No promotions found matching your filters</h3>
+            <button
+              onClick={() => {
+                setCategoryFilter('all');
+                setLocationFilter('all');
+                setPriceRange([0, 100]);
+              }}
+              className="mt-4 text-blue-600 hover:text-blue-800"
             >
-              <div className="flex items-center space-x-2 mt-2">
-                <RadioGroupItem value="member" id="member" />
-                <Label htmlFor="member">Member</Label>
-              </div>
-              <div className="flex items-center space-x-2 mt-2">
-                <RadioGroupItem value="owner" id="owner" />
-                <Label htmlFor="owner">Owner</Label>
-              </div>
-            </RadioGroup>
+              Clear all filters
+            </button>
           </div>
-          {inviteState?.error && (
-            <p className="text-red-500">{inviteState.error}</p>
-          )}
-          {inviteState?.success && (
-            <p className="text-green-500">{inviteState.success}</p>
-          )}
-          <Button
-            type="submit"
-            className="bg-orange-500 hover:bg-orange-600 text-white"
-            disabled={isInvitePending || !isOwner}
-          >
-            {isInvitePending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Inviting...
-              </>
-            ) : (
-              <>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Invite Member
-              </>
-            )}
-          </Button>
-        </form>
-      </CardContent>
-      {!isOwner && (
-        <CardFooter>
-          <p className="text-sm text-muted-foreground">
-            You must be a team owner to invite new members.
-          </p>
-        </CardFooter>
-      )}
-    </Card>
+        )}
+      </main>
+    </div>
   );
-}
+};
 
-export default function SettingsPage() {
-  return (
-    <section className="flex-1 p-4 lg:p-8">
-      <h1 className="text-lg lg:text-2xl font-medium mb-6">Team Settings</h1>
-      <Suspense fallback={<SubscriptionSkeleton />}>
-        <ManageSubscription />
-      </Suspense>
-      <Suspense fallback={<TeamMembersSkeleton />}>
-        <TeamMembers />
-      </Suspense>
-      <Suspense fallback={<InviteTeamMemberSkeleton />}>
-        <InviteTeamMember />
-      </Suspense>
-    </section>
-  );
-}
+export default DiscoverPage;
