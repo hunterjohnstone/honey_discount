@@ -1,6 +1,6 @@
 import { stripe } from '../payments/stripe';
 import { db } from './drizzle';
-import { users, teams, teamMembers } from './schema';
+import { users, teams, teamMembers, products } from './schema';
 import { hashPassword } from '@/lib/auth/session';
 
 async function createStripeProducts() {
@@ -39,6 +39,46 @@ async function createStripeProducts() {
   console.log('Stripe products and prices created successfully.');
 }
 
+async function createOffers() {
+  console.log('seeding some offers to db...');
+
+  await db.insert(products).values([
+    {
+      title: 'Weekend Brunch Special',
+      description: '20% off all brunch stuff',
+      price: 25,
+      imageUrl: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+      category: 'food',
+      startDate: '2023-06-01',
+      endDate: '2023-06-30',
+      location: 'granada',
+      isActive: true,
+    },
+    {
+      title: 'Summer Fitness Package',
+      description: '3 months of gym membership half price.',
+      price: 120,
+      imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+      category: 'fitness',
+      startDate: '2023-06-15',
+      endDate: '2023-08-31',
+      location: 'sevilla',
+      isActive: true,
+    },
+    {
+      title: 'Tech Gadgets Sale',
+      description: '30% off electronics.',
+      price: 299,
+      imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+      category: 'electronics',
+      startDate: '2023-06-10',
+      endDate: '2023-06-20',
+      location: 'madrid',
+      isActive: true,
+    }
+  ])
+}
+
 async function seed() {
   const email = 'test@test.com';
   const password = 'admin123';
@@ -71,6 +111,7 @@ async function seed() {
   });
 
   await createStripeProducts();
+  await createOffers()
 }
 
 seed()

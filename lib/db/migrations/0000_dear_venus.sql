@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS "activity_logs" (
+CREATE TABLE "activity_logs" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"team_id" integer NOT NULL,
 	"user_id" integer,
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS "activity_logs" (
 	"ip_address" varchar(45)
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "invitations" (
+CREATE TABLE "invitations" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"team_id" integer NOT NULL,
 	"email" varchar(255) NOT NULL,
@@ -17,7 +17,22 @@ CREATE TABLE IF NOT EXISTS "invitations" (
 	"status" varchar(20) DEFAULT 'pending' NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "team_members" (
+CREATE TABLE "products" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"title" varchar(100),
+	"description" varchar(100),
+	"price" integer,
+	"image_url" varchar(200),
+	"category" varchar(100),
+	"start_date" varchar(100),
+	"end_date" varchar(100),
+	"location" varchar(100),
+	"is_active" boolean,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "team_members" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" integer NOT NULL,
 	"team_id" integer NOT NULL,
@@ -25,7 +40,7 @@ CREATE TABLE IF NOT EXISTS "team_members" (
 	"joined_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "teams" (
+CREATE TABLE "teams" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -39,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "teams" (
 	CONSTRAINT "teams_stripe_subscription_id_unique" UNIQUE("stripe_subscription_id")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "users" (
+CREATE TABLE "users" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar(100),
 	"email" varchar(255) NOT NULL,

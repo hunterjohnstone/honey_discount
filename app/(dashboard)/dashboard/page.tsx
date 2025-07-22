@@ -2,6 +2,9 @@
 "use client";
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import z from 'zod';
+import { dbProductSchema, ProductSchema, transformPromotionObject } from '../transform';
+import Error from 'next/error';
 
 type Promotion = {
   id: string;
@@ -16,7 +19,7 @@ type Promotion = {
   isActive: boolean;
 };
 
-type InputPromotionSchema = { //price is a string
+type InputPromotionSchema = {
   id: string;
   title: string;
   description: string;
@@ -29,28 +32,14 @@ type InputPromotionSchema = { //price is a string
   isActive: boolean;
 }
 
-type ValidatedPromotionSchema = { //price is a number
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  category: string;
-  startDate: string;
-  endDate: string;
-  location: string;
-  isActive: boolean;
-}
-
 const DiscoverPage = () => {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [filteredPromotions, setFilteredPromotions] = useState<Promotion[]>([]);
-  const [isEmployer, setIsEmployer] = useState(false);
   const [isAddingPromotion, setIsAddingPromotion] = useState(false);
-  const [newPromotion, setNewPromotion] = useState<Omit<ValidatedPromotionSchema, 'id' | 'isActive'>>({
+  const [newPromotion, setNewPromotion] = useState<Omit<InputPromotionSchema, 'id' | 'isActive'>>({
     title: '',
     description: '',
-    price: 0,
+    price: '0',
     imageUrl: '',
     category: 'food',
     startDate: new Date().toISOString().split('T')[0],
@@ -64,50 +53,25 @@ const DiscoverPage = () => {
   const [locationFilter, setLocationFilter] = useState<string>('all');
 
   useEffect(() => {
-    // Simulate fetching promotions from an API
-    const mockPromotions: Promotion[] = [
-      {
-        id: '1',
-        title: 'Weekend Brunch Special',
-        description: '20% off all brunch stuff',
-        price: 25,
-        imageUrl: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-        category: 'food',
-        startDate: '2023-06-01',
-        endDate: '2023-06-30',
-        location: 'granada',
-        isActive: true,
-      },
-      {
-        id: '2',
-        title: 'Summer Fitness Package',
-        description: '3 months of gym membership half price.',
-        price: 120,
-        imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-        category: 'fitness',
-        startDate: '2023-06-15',
-        endDate: '2023-08-31',
-        location: 'sevilla',
-        isActive: true,
-      },
-      {
-        id: '3',
-        title: 'Tech Gadgets Sale',
-        description: '30% off electronics.',
-        price: 299,
-        imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-        category: 'electronics',
-        startDate: '2023-06-10',
-        endDate: '2023-06-20',
-        location: 'madrid',
-        isActive: true,
-      },
-    ];
-    setPromotions(mockPromotions);
-    setFilteredPromotions(mockPromotions);
+    // Retrieve data from the DB via API call
+    const fetchData = async () => {
+      try {
+        //get product data from api
+        const response = await fetch('/api/product/get_data');
+        const data = await response.json();
+        
+        //transform the data
+        const transformedPromotions = data.map((offer : z.infer<typeof ProductSchema>) => transformPromotionObject(offer));
 
-    // Check if user is an employer (in a real app, this would come from auth context)
-    setIsEmployer(false); // Change to true to see employer features
+        //save it in state
+        setPromotions(transformedPromotions);
+        setFilteredPromotions(transformedPromotions);
+      } catch (error) {
+        console.log("you fucked up at fetch offers", error);
+        return Error
+      }
+    };
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -127,21 +91,32 @@ const DiscoverPage = () => {
     setFilteredPromotions(results);
   }, [categoryFilter, locationFilter, priceRange, promotions]);
 
-  const handleAddPromotion = () => {
-    // TODO: send this data to the API which stores information in the postgres DB
-    // In a real app, this would call an API
+  const handleAddPromotion = async () => {
     const promotionToAdd: Promotion = {
       ...newPromotion,
+      price: z.coerce.number().parse(newPromotion.price), //price stored as a number so we coerce it
       id: Math.random().toString(36).substring(2, 9),
       isActive: true,
     };
+
+    //TODO before moving to prod, add the REAL API endpoints in .env
+      await fetch('/api/product/put_data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add other headers if needed (e.g., Authorization)
+        },
+        body: JSON.stringify(promotionToAdd),
+      });
+    
+    
     
     setPromotions([...promotions, promotionToAdd]);
     setIsAddingPromotion(false);
     setNewPromotion({
       title: '',
       description: '',
-      price: 0,
+      price: '0',
       imageUrl: '',
       category: 'food',
       startDate: new Date().toISOString().split('T')[0],
@@ -238,7 +213,6 @@ const DiscoverPage = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
               <h2 className="text-2xl font-bold mb-4 text-gray-800">Add New Promotion</h2>
-              
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>

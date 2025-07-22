@@ -5,8 +5,24 @@ import {
   text,
   timestamp,
   integer,
+  boolean
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+
+export const products = pgTable('products', {
+  id: serial('id').primaryKey(),
+  title: varchar('title', {length: 100}),
+  description: varchar('description', {length: 100}),
+  price: integer('price'),
+  imageUrl: varchar('image_url', {length: 200}),
+  category: varchar('category', {length: 100}),
+  startDate: varchar('start_date', {length: 100}),
+  endDate: varchar('end_date', {length: 100}),
+  location: varchar('location', {length: 100}),
+  isActive: boolean('is_active'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -114,6 +130,8 @@ export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type Products = typeof products.$inferSelect;
+export type NewProducts = typeof products.$inferInsert;
 export type Team = typeof teams.$inferSelect;
 export type NewTeam = typeof teams.$inferInsert;
 export type TeamMember = typeof teamMembers.$inferSelect;

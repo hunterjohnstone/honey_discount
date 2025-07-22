@@ -127,4 +127,9 @@ export async function getTeamForUser() {
   });
 
   return result?.team || null;
+};
+
+export async function getProductData() {
+  const results = await db.query.products.findMany();
+  return results
 }
