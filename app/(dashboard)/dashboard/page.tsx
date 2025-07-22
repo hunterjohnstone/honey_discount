@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import z from 'zod';
-import { dbProductSchema, ProductSchema, transformPromotionObject } from '../transform';
+import { ProductSchema, transformPromotionObject } from '../transform';
 import Error from 'next/error';
+import useSWR from 'swr';
+import { User } from '@/lib/db/schema';
 
 type Promotion = {
   id: string;
@@ -32,6 +34,8 @@ type InputPromotionSchema = {
   isActive: boolean;
 }
 
+const fetcher = (url: string) => fetch(url).then((r) => r.json())
+
 const DiscoverPage = () => {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [filteredPromotions, setFilteredPromotions] = useState<Promotion[]>([]);
@@ -46,6 +50,9 @@ const DiscoverPage = () => {
     endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     location: '',
   });
+
+  //Allow calls to API and use user body
+  const {data: user } = useSWR<User>('/api/user', fetcher)
 
   // Filters
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -143,8 +150,7 @@ const DiscoverPage = () => {
       <main className="container mx-auto py-8 px-4">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Discover Promotions</h1>
-          {/* //TODO: UPDATE SO ONLY CERTAIN USERNAMES CAN ADD PROMOTIONS */}
-          {
+          { user?.name == "bigballs69" &&
             <button
               onClick={() => setIsAddingPromotion(true)}
               className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
@@ -325,13 +331,13 @@ const DiscoverPage = () => {
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={() => setIsAddingPromotion(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  className="px-4 py-2 border cursor-pointer border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleAddPromotion}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="px-4 py-2 bg-blue-600 text-white cursor-pointer rounded-md hover:bg-blue-700"
                 >
                   Add Promotion
                 </button>

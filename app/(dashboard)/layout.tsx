@@ -32,14 +32,18 @@ function UserMenu() {
   if (!user) {
     return (
       <>
-        <Link
-          href="/pricing"
-          className="text-sm font-medium text-gray-700 hover:text-gray-900"
-        >
-          Pricing
-        </Link>
-        <Button asChild className="rounded-full">
+        <Button className="text-black rounded-full bg-white cursor-pointer text-sm font-medium hover:bg-gray-200">
+          <Link
+            href="/pricing"
+          >
+            Pricing
+          </Link>
+        </Button>
+        <Button asChild className="rounded-full cursor-pointer">
           <Link href="/sign-up">Sign Up</Link>
+        </Button>
+        <Button className="rounded-full bg-white border-4 border-blue-300 hover:bg-gray-200 cursor-pointer text-black">
+          <Link href="/sign-in">Sign In</Link>
         </Button>
       </>
     );
