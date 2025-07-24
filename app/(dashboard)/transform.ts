@@ -21,7 +21,7 @@ export const ProductsArraySchema = z.array(ProductSchema);
 
 export type dbProductSchema = z.infer<typeof ProductsArraySchema>
 
-type Promotion = {
+export type Promotion = {
     id: string;
     title: string;
     description: string;

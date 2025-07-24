@@ -7,6 +7,9 @@ import { ProductSchema, transformPromotionObject } from '../transform';
 import Error from 'next/error';
 import useSWR from 'swr';
 import { User } from '@/lib/db/schema';
+import Link from 'next/link';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { promotionsAtomState } from "./atom_state";
 
 type Promotion = {
   id: string;
@@ -50,13 +53,16 @@ const DiscoverPage = () => {
     endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     location: '',
   });
+  
+
+  const setNewPromotionsAtom = useSetAtom(promotionsAtomState)
 
   //Allow calls to API and use user body
   const {data: user } = useSWR<User>('/api/user', fetcher)
 
   // Filters
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
   const [locationFilter, setLocationFilter] = useState<string>('all');
 
   useEffect(() => {
@@ -69,6 +75,8 @@ const DiscoverPage = () => {
         
         //transform the data
         const transformedPromotions = data.map((offer : z.infer<typeof ProductSchema>) => transformPromotionObject(offer));
+
+        setNewPromotionsAtom(transformedPromotions)
 
         //save it in state
         setPromotions(transformedPromotions);
@@ -84,15 +92,12 @@ const DiscoverPage = () => {
   useEffect(() => {
     // Apply filters
     let results = [...promotions];
-    
     if (categoryFilter !== 'all') {
       results = results.filter(p => p.category === categoryFilter);
     }
-    
     if (locationFilter !== 'all') {
       results = results.filter(p => p.location === locationFilter);
     }
-    
     results = results.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
     
     setFilteredPromotions(results);
@@ -348,9 +353,13 @@ const DiscoverPage = () => {
 
         {/* Promotions Grid */}
         {filteredPromotions.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredPromotions.map((promotion) => (
-              <div key={promotion.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <Link 
+                key={promotion.id}
+                href={{pathname: `/dashboard/${promotion.id}`}}
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow block"
+              >
                 <div className="h-48 overflow-hidden">
                   <img
                     src={promotion.imageUrl}
@@ -378,7 +387,7 @@ const DiscoverPage = () => {
                     </span>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (
@@ -388,9 +397,9 @@ const DiscoverPage = () => {
               onClick={() => {
                 setCategoryFilter('all');
                 setLocationFilter('all');
-                setPriceRange([0, 100]);
+                setPriceRange([0, 500]);
               }}
-              className="mt-4 text-blue-600 hover:text-blue-800"
+              className="mt-4 text-blue-600 hover:text-blue-800 cursor-pointer"
             >
               Clear all filters
             </button>
