@@ -109,38 +109,68 @@ export default function PromotionPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Comments</h2>
-        
-        <form onSubmit={handleSubmitComment} className="mb-6">
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Leave a comment..."
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-3"
-            rows={3}
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Post Comment
-          </button>
-        </form>
+      <div className="bg-white rounded-xl shadow-md p-6">
+  <h2 className="text-2xl font-bold mb-6 text-gray-800">Comments</h2>
+  
+  <form onSubmit={handleSubmitComment} className="mb-8">
+    <textarea
+      value={comment}
+      onChange={(e) => setComment(e.target.value)}
+      placeholder="Share your thoughts..."
+      className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4 text-gray-700 placeholder-gray-400"
+      rows={4}
+    />
+    <button
+      type="submit"
+      className="cursor-pointer px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow hover:shadow-md"
+    >
+      Post Comment
+    </button>
+  </form>
 
-        <div className="space-y-4">
-          {comments.length > 0 ? (
-            comments.map((c) => (
-              <div key={c.id.toString()} className="border-b border-gray-200 pb-4 last:border-0">
-                <p className="text-gray-800 mb-1">{c.text}</p>
-                <p className="text-gray-500 text-sm">{c.date}</p>
+  <div className="space-y-6">
+    {comments.length > 0 ? (
+      comments.map((c) => (
+        <div key={c.id.toString()} className="border-b border-gray-100 pb-6 last:border-0 group">
+          <div className="flex items-start gap-3 mb-2">
+            {/* User avatar placeholder - replace with actual user image if available */}
+            
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                {/* //GET USER DATA FROM CONTEXT */}
+                <span className="font-semibold text-gray-800">Hunter</span>
+                <span className="text-gray-400 text-xs">•</span>
+                <span className="text-gray-500 text-sm">
+                  {new Date().toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </span>
               </div>
-            ))
-          ) : (
-            <p className="text-gray-500">No comments yet. Be the first to comment!</p>
-          )}
+              <p className="text-gray-700 mt-1 whitespace-pre-line">{c.text}</p>
+              
+              {/* Optional reply/like buttons */}
+              <div className="flex gap-4 mt-3 text-sm text-gray-500">
+                <button className="hover:text-blue-600 transition-colors">Reply</button>
+                <button className="hover:text-blue-600 transition-colors">Like</button>
+              </div>
+            </div>
+          </div>
         </div>
+      ))
+    ) : (
+      <div className="text-center py-8">
+        <div className="mx-auto h-16 w-16 text-gray-300 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </div>
+        <p className="text-gray-500">No comments yet. Be the first to share your thoughts!</p>
       </div>
+    )}
+  </div>
+</div>
     </div>
   );
 }
