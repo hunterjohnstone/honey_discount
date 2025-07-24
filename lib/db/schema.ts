@@ -5,9 +5,12 @@ import {
   text,
   timestamp,
   integer,
-  boolean
+  boolean,
+  index,
+  uniqueIndex
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+
 
 export const products = pgTable('products', {
   id: serial('id').primaryKey(),
@@ -34,6 +37,21 @@ export const users = pgTable('users', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),
 });
+
+export const productReviews = pgTable('product_reviews', {
+  id: serial('id').primaryKey(),
+  productId: integer('product_id').notNull().references(() => products.id, { onDelete: 'cascade' }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }), // Now users exists
+  rating: integer('rating').notNull(),
+  comment: text('comment'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ([  // Note: Returning an object, not array
+  index("review_product_idx").on(table.productId),  // Using table. not productReviews.
+  index("review_user_idx").on(table.userId),
+  index("review_rating_idx").on(table.rating),
+  uniqueIndex("unique_product_user_review").on(table.productId, table.userId)
+]));
 
 export const teams = pgTable('teams', {
   id: serial('id').primaryKey(),
@@ -68,20 +86,6 @@ export const activityLogs = pgTable('activity_logs', {
   action: text('action').notNull(),
   timestamp: timestamp('timestamp').notNull().defaultNow(),
   ipAddress: varchar('ip_address', { length: 45 }),
-});
-
-export const invitations = pgTable('invitations', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
-    .notNull()
-    .references(() => teams.id),
-  email: varchar('email', { length: 255 }).notNull(),
-  role: varchar('role', { length: 50 }).notNull(),
-  invitedBy: integer('invited_by')
-    .notNull()
-    .references(() => users.id),
-  invitedAt: timestamp('invited_at').notNull().defaultNow(),
-  status: varchar('status', { length: 20 }).notNull().default('pending'),
 });
 
 export const teamsRelations = relations(teams, ({ many }) => ({
@@ -125,6 +129,8 @@ export type TeamMember = typeof teamMembers.$inferSelect;
 export type NewTeamMember = typeof teamMembers.$inferInsert;
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type NewActivityLog = typeof activityLogs.$inferInsert;
+export type ProductReviews = typeof productReviews.$inferSelect;
+export type NewProductReviews = typeof productReviews.$inferInsert;
 export type TeamDataWithMembers = Team & {
   teamMembers: (TeamMember & {
     user: Pick<User, 'id' | 'name' | 'email'>;

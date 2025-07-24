@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAtomValue } from 'jotai';
 import { promotionsAtomState } from '../atom_state';
+import useSWR from 'swr';
+import { User } from '@/lib/db/schema';
 
 type Promotion = {
   id: string;
@@ -25,6 +27,8 @@ type Comment = {
   date: String,
 };
 
+const fetcher = (url: string) => fetch(url).then((r) => r.json()); 
+
 export default function PromotionPage() {
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
@@ -34,6 +38,8 @@ export default function PromotionPage() {
   
   const promotionsAtom = useAtomValue<Promotion[]>(promotionsAtomState);
   const [promotion, setPromotionDisplay] = useState<Promotion | null>(null);
+
+  const { data: user } = useSWR<User>('/api/user', fetcher)
 
   useEffect(() => {
     if (!id) return;
@@ -134,11 +140,10 @@ export default function PromotionPage() {
         <div key={c.id.toString()} className="border-b border-gray-100 pb-6 last:border-0 group">
           <div className="flex items-start gap-3 mb-2">
             {/* User avatar placeholder - replace with actual user image if available */}
-            
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 {/* //GET USER DATA FROM CONTEXT */}
-                <span className="font-semibold text-gray-800">Hunter</span>
+                <span className="font-semibold text-gray-800">{user?.name || 'UNKNOWN'}</span>
                 <span className="text-gray-400 text-xs">•</span>
                 <span className="text-gray-500 text-sm">
                   {new Date().toLocaleDateString('en-US', {

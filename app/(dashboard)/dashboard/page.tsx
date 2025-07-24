@@ -8,7 +8,7 @@ import Error from 'next/error';
 import useSWR from 'swr';
 import { User } from '@/lib/db/schema';
 import Link from 'next/link';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import { promotionsAtomState } from "./atom_state";
 
 type Promotion = {
