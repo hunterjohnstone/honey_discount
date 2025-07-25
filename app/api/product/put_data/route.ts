@@ -35,7 +35,7 @@ type Promotion = {
         updatedAt: new Date(),
       });
   
-      console.log("Created successfully");
+      console.log("Successfully posted");
       
       // Return a success response
       return NextResponse.json(

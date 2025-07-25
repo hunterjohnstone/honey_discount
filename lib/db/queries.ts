@@ -3,6 +3,10 @@ import { db } from './drizzle';
 import { activityLogs, teamMembers, teams, users } from './schema';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth/session';
+import { resumePluginState } from 'next/dist/build/build-context';
+import { productReviews } from "./schema"; // Import your schema tables
+import { number } from 'zod';
+
 
 export async function getUser() {
   const sessionCookie = (await cookies()).get('session');
@@ -131,5 +135,26 @@ export async function getTeamForUser() {
 
 export async function getProductData() {
   const results = await db.query.products.findMany();
-  return results
+  return results;
 }
+
+
+export async function getProductReviewsWithUsers(productId: number) {
+  console.log("1111111111111111");
+  console.log("productID, ", productId);
+  console.log("type, ", typeof(productId));
+
+  const reviews = await db
+    .select({
+      userName: users.name,
+      comment: productReviews.comment,
+      date: productReviews.createdAt,
+      rating: productReviews.rating // Optional: include rating if needed
+    })
+    .from(productReviews)
+    .where(eq(productReviews.productId, productId))
+    .leftJoin(users, eq(productReviews.userId, users.id));
+  console.log("22222222222222222", reviews)
+
+  return reviews;
+};
