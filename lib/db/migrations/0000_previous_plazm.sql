@@ -28,6 +28,8 @@ CREATE TABLE "products" (
 	"end_date" varchar(100),
 	"location" varchar(100),
 	"is_active" boolean,
+	"starAverage" numeric(2, 1) DEFAULT '0.0' NOT NULL,
+	"num_reviews" integer DEFAULT 0 NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );

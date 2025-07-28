@@ -7,9 +7,11 @@ import {
   integer,
   boolean,
   index,
-  uniqueIndex
+  uniqueIndex,
+  numeric
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import { number } from 'zod';
 
 
 export const products = pgTable('products', {
@@ -23,6 +25,8 @@ export const products = pgTable('products', {
   endDate: varchar('end_date', {length: 100}),
   location: varchar('location', {length: 100}),
   isActive: boolean('is_active'),
+  starAverage: numeric({ precision: 2, scale: 1 }).default("0.0").notNull(),
+  numReviews: integer("num_reviews").default(0).notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

@@ -11,4 +11,4 @@ export async function GET(request: Request) {
 
   const res = await getProductReviewsWithUsers(Number(productId));
   return NextResponse.json(res);
-}
+};

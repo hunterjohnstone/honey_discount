@@ -7,8 +7,8 @@ import { promotionsAtomState } from '../atom_state';
 import useSWR from 'swr';
 import { User } from '@/lib/db/schema';
 import { ReviewForm } from '../review-form';
-import { ProductSchema, transformPromotionObject } from '../../transform';
 import z from 'zod';
+import { RatingDisplay } from '../../startDisplay';
 
 type Promotion = {
   id: string;
@@ -21,6 +21,8 @@ type Promotion = {
   endDate: string;
   location: string;
   isActive: boolean;
+  starAverage: number;
+  numReviews: number;
 };
 
 type Comment = {
@@ -92,7 +94,10 @@ export default function PromotionPage() {
         </div>
         <div className="p-6">
           <div className="flex justify-between items-start mb-4">
-            <h1 className="text-2xl font-bold text-gray-800">{promotion.title}</h1>
+            <div className="flex">
+              <h1 className="pr-5 text-2xl font-bold text-gray-800">{promotion.title}</h1>
+              <RatingDisplay averageRating={promotion.starAverage} reviewCount={promotion.numReviews} size="md" />
+            </div>
             <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-lg font-medium">
               ${promotion.price}
             </span>

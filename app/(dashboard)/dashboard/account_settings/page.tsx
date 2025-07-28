@@ -176,7 +176,7 @@ function ManageSubscription() {
             )}
             <Button
               type="submit"
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-orange-500 hover:bg-orange-600 text-white cursor-pointer"
               disabled={isPending}
               onClick={() => {
                 if (!isPending) {

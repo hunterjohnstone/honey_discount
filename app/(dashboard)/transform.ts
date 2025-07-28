@@ -12,6 +12,8 @@ export const ProductSchema = z.object({
   endDate: z.string(),
   location: z.string(),
   isActive: z.boolean(),
+  numReviews: z.number(),
+  starAverage: z.string(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime()
 });
@@ -21,7 +23,7 @@ export const ProductsArraySchema = z.array(ProductSchema);
 
 export type dbProductSchema = z.infer<typeof ProductsArraySchema>
 
-export type Promotion = {
+export type TransformedPromotion = {
     id: string;
     title: string;
     description: string;
@@ -32,10 +34,12 @@ export type Promotion = {
     endDate: string;
     location: string;
     isActive: boolean;
+    numReviews: number;
+    starAverage: number;
   };
 
-  export const transformPromotionObject = (inputObject: z.infer<typeof ProductSchema>): Promotion => {
-    const result: Promotion = {
+  export const transformPromotionObject = (inputObject: z.infer<typeof ProductSchema>): TransformedPromotion => {
+    const result: TransformedPromotion = {
         id: inputObject.id.toString(), // Convert number to string
         title: inputObject.title,
         description: inputObject.description,
@@ -45,8 +49,9 @@ export type Promotion = {
         startDate: inputObject.startDate,
         endDate: inputObject.endDate,
         location: inputObject.location,
-        isActive: inputObject.isActive
+        isActive: inputObject.isActive,
+        numReviews: inputObject.numReviews,
+        starAverage: parseFloat(inputObject.starAverage)
     };
-    console.log("result")
     return result;
 };

@@ -1,5 +1,5 @@
 {
-  "id": "3ae2ecb3-f41c-488a-b755-e726df2336a3",
+  "id": "d5b947bb-2b5c-43b3-a6c4-9bc0c1e97249",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -295,6 +295,20 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": false
+        },
+        "starAverage": {
+          "name": "starAverage",
+          "type": "numeric(2, 1)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0.0'"
+        },
+        "num_reviews": {
+          "name": "num_reviews",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         },
         "created_at": {
           "name": "created_at",

@@ -10,6 +10,7 @@ import { User } from '@/lib/db/schema';
 import Link from 'next/link';
 import { useSetAtom } from 'jotai';
 import { promotionsAtomState } from "./atom_state";
+import { RatingDisplay } from '../startDisplay';
 
 type Promotion = {
   id: string;
@@ -22,6 +23,8 @@ type Promotion = {
   endDate: string;
   location: string;
   isActive: boolean;
+  starAverage: string;
+  numReviews: number;
 };
 
 type InputPromotionSchema = {
@@ -35,6 +38,8 @@ type InputPromotionSchema = {
   endDate: string;
   location: string;
   isActive: boolean;
+  numReviews: number;
+  starAverage: string;
 }
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
@@ -52,6 +57,8 @@ const DiscoverPage = () => {
     startDate: new Date().toISOString().split('T')[0],
     endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     location: '',
+    numReviews: 0,
+    starAverage: "0.0",
   });
   
 
@@ -72,6 +79,8 @@ const DiscoverPage = () => {
         //get product data from api
         const response = await fetch('/api/product/get_data');
         const data = await response.json();
+
+        console.log("data in frontend is: ", data)
         
         //transform the data
         const transformedPromotions = data.map((offer : z.infer<typeof ProductSchema>) => transformPromotionObject(offer));
@@ -81,6 +90,7 @@ const DiscoverPage = () => {
         //save it in state
         setPromotions(transformedPromotions);
         setFilteredPromotions(transformedPromotions);
+        console.log("filtered promotions: ",filteredPromotions)
       } catch (error) {
         console.log("you fucked up at fetch offers", error);
         return Error
@@ -109,6 +119,7 @@ const DiscoverPage = () => {
       price: z.coerce.number().parse(newPromotion.price), //price stored as a number so we coerce it
       id: Math.random().toString(36).substring(2, 9),
       isActive: true,
+
     };
 
     //TODO before moving to prod, add the REAL API endpoints in .env
@@ -134,6 +145,8 @@ const DiscoverPage = () => {
       startDate: new Date().toISOString().split('T')[0],
       endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       location: '',
+      starAverage: "0.0",
+      numReviews: 0
     });
   };
 
@@ -360,6 +373,7 @@ const DiscoverPage = () => {
                 href={{pathname: `/dashboard/${promotion.id}`}}
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow block"
               >
+              {/* <RatingDisplay averageRating={parseFloat(promotion.starAverage)} reviewCount={promotion.numReviews} size="md"/> */}
                 <div className="h-48 overflow-hidden">
                   <img
                     src={promotion.imageUrl}
@@ -367,6 +381,9 @@ const DiscoverPage = () => {
                     className="w-full h-full object-cover"
                   />
                 </div>
+
+                
+
                 <div className="p-4">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-xl font-semibold text-gray-800">{promotion.title}</h3>
@@ -374,7 +391,12 @@ const DiscoverPage = () => {
                       ${promotion.price}
                     </span>
                   </div>
-                  <p className="text-gray-600 mb-3">{promotion.description}</p>
+                  <RatingDisplay 
+                    averageRating={parseFloat(promotion.starAverage)} 
+                    reviewCount={promotion.numReviews} 
+                    size="sm"
+                  />
+                  <p className="text-gray-600 mb-3 pt-2">{promotion.description}</p>
                   <div className="flex flex-wrap gap-2">
                     <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
                       {promotion.category}

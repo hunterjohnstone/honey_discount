@@ -53,6 +53,17 @@ pnpm db:migrate
 pnpm db:seed
 ```
 
+## bash to reset database after changes
+```bash
+docker-compose down -v
+docker system prune -a --volumes
+npx drizzle-kit drop
+docker-compose up -d --build
+npm run db:generate
+npm run db:migrate
+npm run db:seed
+```
+
 This will create the following user and team:
 
 - User: `test@test.com`

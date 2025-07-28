@@ -1,6 +1,6 @@
 import { desc, and, eq, isNull } from 'drizzle-orm';
 import { db } from './drizzle';
-import { activityLogs, teamMembers, teams, users } from './schema';
+import { activityLogs, products, teamMembers, teams, users } from './schema';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth/session';
 import { resumePluginState } from 'next/dist/build/build-context';
@@ -140,9 +140,6 @@ export async function getProductData() {
 
 
 export async function getProductReviewsWithUsers(productId: number) {
-  console.log("1111111111111111");
-  console.log("productID, ", productId);
-  console.log("type, ", typeof(productId));
 
   const reviews = await db
     .select({
@@ -154,7 +151,19 @@ export async function getProductReviewsWithUsers(productId: number) {
     .from(productReviews)
     .where(eq(productReviews.productId, productId))
     .leftJoin(users, eq(productReviews.userId, users.id));
-  console.log("22222222222222222", reviews)
 
   return reviews;
+};
+
+// export async function getProductReviewData(productId: number) {
+//   const review = await db.({
+//     numReviews: products.numReviews,
+//     ave: products.starAverage
+//   }).from(products).where(eq(products.id, productId));
+//   return review;
+// };
+
+export async function getAveAndNum(productId: number) {
+  const data = await db.query.products.findFirst({ where: eq(products.id, productId)});
+  return data;
 };

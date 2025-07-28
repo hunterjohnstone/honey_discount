@@ -11,6 +11,8 @@ export type Promotion = {
     endDate: string;
     location: string;
     isActive: boolean;
+    starAverage: number;
+    numReviews: number;
   };
 
 export const promotionsAtomState = atom<Promotion[]>([
@@ -24,7 +26,9 @@ export const promotionsAtomState = atom<Promotion[]>([
         startDate: new Date().toISOString().split('T')[0],
         endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         location: '',
-        isActive: false
+        isActive: false,
+        numReviews: 0,
+        starAverage: 0.0,
     }
   ]
 );
