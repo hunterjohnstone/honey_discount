@@ -1,128 +1,437 @@
+"use client";
+import { useState, useEffect } from 'react';
+import Head from 'next/head';
+import z from 'zod';
+import Error from 'next/error';
+import useSWR from 'swr';
+import { User } from '@/lib/db/schema';
+import Link from 'next/link';
+import { useSetAtom } from 'jotai';
+import { promotionsAtomState } from './profile/atom_state';
+import { ProductSchema, transformPromotionObject } from './transform';
+import { RatingDisplay } from './startDisplay';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, CreditCard, Database } from 'lucide-react';
 
-export default function HomePage() {
+
+type Promotion = {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  category: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  isActive: boolean;
+  starAverage: string;
+  numReviews: number;
+  userId: number;
+};
+
+type InputPromotionSchema = {
+  id: string;
+  title: string;
+  description: string;
+  price: string;
+  imageUrl: string;
+  category: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  isActive: boolean;
+  numReviews: number;
+  starAverage: string;
+};
+
+const fetcher = (url: string) => fetch(url).then((r) => r.json())
+
+const DiscoverPage = () => {
+  const router = useRouter();
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [filteredPromotions, setFilteredPromotions] = useState<Promotion[]>([]);
+  const [isAddingPromotion, setIsAddingPromotion] = useState(false);
+  const [newPromotion, setNewPromotion] = useState<Omit<InputPromotionSchema, 'id' | 'isActive'>>({
+    title: '',
+    description: '',
+    price: '0',
+    imageUrl: '',
+    category: 'food',
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    location: '',
+    numReviews: 0,
+    starAverage: "0.0",
+  });
+  
+  const setNewPromotionsAtom = useSetAtom(promotionsAtomState)
+
+  //Allow calls to API and use user body
+  const {data: user } = useSWR<User>('/api/user', fetcher)
+
+  // Filters
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
+  const [locationFilter, setLocationFilter] = useState<string>('all');
+
+  useEffect(() => {
+    // Retrieve data from the DB via API call
+    const fetchData = async () => {
+      try {
+        //get product data from api
+        const response = await fetch('/api/product/get_data');
+        const data = await response.json();
+
+        console.log("data in frontend is: ", data)
+        
+        //transform the data
+        const transformedPromotions = data.map((offer : z.infer<typeof ProductSchema>) => transformPromotionObject(offer));
+
+        setNewPromotionsAtom(transformedPromotions)
+
+        //save it in state
+        setPromotions(transformedPromotions);
+        setFilteredPromotions(transformedPromotions);
+        console.log("filtered promotions: ",filteredPromotions)
+      } catch (error) {
+        console.log("you fucked up at fetch offers", error);
+        return Error
+      }
+    };
+    fetchData();
+  }, [router]);
+
+  useEffect(() => {
+    // Apply filters
+    let results = [...promotions];
+    if (categoryFilter !== 'all') {
+      results = results.filter(p => p.category === categoryFilter);
+    }
+    if (locationFilter !== 'all') {
+      results = results.filter(p => p.location === locationFilter);
+    }
+    results = results.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+    
+    setFilteredPromotions(results);
+  }, [categoryFilter, locationFilter, priceRange, promotions]);
+
+  const handleAddPromotion = async (userId: number) => {
+    const promotionToAdd: Promotion = {
+      ...newPromotion,
+      userId,
+      price: z.coerce.number().parse(newPromotion.price), //price stored as a number so we coerce it
+      id: Math.random().toString(36).substring(2, 9),
+      isActive: true,
+
+    };
+
+    //TODO before moving to prod, add the REAL API endpoints in .env
+      await fetch('/api/product/put_data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add other headers if needed (e.g., Authorization)
+        },
+        body: JSON.stringify(promotionToAdd),
+      });
+    
+    setPromotions([...promotions, promotionToAdd]);
+    setIsAddingPromotion(false);
+    setNewPromotion({
+      title: '',
+      description: '',
+      price: '0',
+      imageUrl: '',
+      category: 'food',
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      location: '',
+      starAverage: "0.0",
+      numReviews: 0
+    });
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setNewPromotion({
+      ...newPromotion,
+      [name]: name === 'price' ? parseFloat(value) : value,
+    });
+  };
+
   return (
-    <main>
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-            <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
-              <h1 className="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl">
-                Have access to the best promotions
-                <span className="block text-orange-500">In Grana</span>
-              </h1>
-              <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
-              Add some summary here about blablabla
-              </p>
-              <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
-                <a
-                  href="http://localhost:3000/sign-up"
-                  target="_blank"
-                >
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="text-lg rounded-full cursor-pointer"
-                  >
-                    Sign up now
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </a>
-              </div>
-            </div>
-            TODO: THIS COULD BE A DEMO OF THE DESCOVERY PAGE LIKE A VIDEO OR SOMETHING
-            {/* HERE I WANT TO HAVE A DEMO IMAGE OR CLIP OF HOW THE WHOLE THING WORKS. TODO */}
-            {/* <div className="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">
-              <Terminal />
-            </div> */}
-          </div>
+    <div className="min-h-screen bg-gray-50">
+      <Head>
+        <title>Discover Promotions</title>
+        <meta name="description" content="Find the latest promotions and deals" />
+      </Head>
+
+      <main className="container mx-auto py-8 px-4">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">Discover Promotions</h1>
+              <Button
+              onClick={() => (
+                !user ?  router.push('/sign-up') :
+                setIsAddingPromotion(true))}
+              className="cursor-pointer"
+            >
+              Add New Promotion
+            </Button>
         </div>
-      </section>
 
-      <section className="py-16 bg-white w-full">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:grid lg:grid-cols-3 lg:gap-8">
+        {/* Filters */}
+        <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">Filters</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-orange-500 text-white">
-                <svg viewBox="0 0 24 24" className="h-6 w-6">
-                  <path
-                    fill="currentColor"
-                    d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.345-.034-.46 0-.915.01-1.36.034.44-.572.895-1.096 1.345-1.565zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.868.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.345.034.46 0 .915-.01 1.36-.034-.44.572-.895 1.095-1.345 1.565-.455-.47-.91-.993-1.36-1.565z"
-                  />
-                </svg>
-              </div>
-              <div className="mt-5">
-                <h2 className="text-lg font-medium text-gray-900">
-                  Find the best local deals
-                </h2>
-                <p className="mt-2 text-base text-gray-500">
-                  This whole thing should actually be in spanish if its gonna be first launched in Spain.
-                </p>
-              </div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="all">All Categories</option>
+                <option value="food">Food & Dining</option>
+                <option value="fitness">Fitness</option>
+                <option value="electronics">Electronics</option>
+                <option value="retail">Retail</option>
+                <option value="services">Services</option>
+              </select>
             </div>
-
-            <div className="mt-10 lg:mt-0">
-              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-orange-500 text-white">
-                <Database className="h-6 w-6" />
-              </div>
-              <div className="mt-5">
-                <h2 className="text-lg font-medium text-gray-900">
-                  Access limited time sales
-                </h2>
-                <p className="mt-2 text-base text-gray-500">
-                some bullshit in here something about users having exclusive access to limited time sales
-
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-10 lg:mt-0">
-              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-orange-500 text-white">
-                <CreditCard className="h-6 w-6" />
-              </div>
-              <div className="mt-5">
-                <h2 className="text-lg font-medium text-gray-900">
-                  Save money
-                </h2>
-                <p className="mt-2 text-base text-gray-500">
-                  some bullshit in here something about saving money
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-                More information down here
-              </h2>
-              <p className="mt-3 max-w-3xl text-lg text-gray-500">
-                Use some temporary text, maybe here i will have something about 
-                the contact information, and a form that they can fill out which will redirect to 
-                my personal email address
             
-              </p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+              <select
+                value={locationFilter}
+                onChange={(e) => setLocationFilter(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="all">All Locations</option>
+                <option value="granada">Granada</option>
+                <option value="sevilla">Sevilla</option>
+                <option value="madrid">Madrid</option>
+                <option value="suburbs">Suburbs</option>
+              </select>
             </div>
-            <div className="mt-8 lg:mt-0 flex justify-center lg:justify-end">
-              <a href="http://localhost:3000/dashboard" target="_blank">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-lg rounded-full cursor-pointer"
-                >
-                  Already a member?
-                  <ArrowRight className="ml-3 h-6 w-6" />
-                </Button>
-              </a>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Price Range: ${priceRange[0]} - ${priceRange[1]}
+              </label>
+              <div className="flex items-center space-x-4">
+                <input
+                  type="range"
+                  min="0"
+                  max="500"
+                  step="5"
+                  value={priceRange[1]}
+                  onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+                  className="w-full"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </section>
-    </main>
+
+        {/* Add Promotion Modal */}
+        {isAddingPromotion && user && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">Add New Promotion</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={newPromotion.title}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    placeholder="Promotion title"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    name="description"
+                    value={newPromotion.description}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    rows={3}
+                    placeholder="Detailed description of the promotion"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                    <input
+                      type="number"
+                      name="price"
+                      value={newPromotion.price}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select
+                      name="category"
+                      value={newPromotion.category}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="food">Food & Dining</option>
+                      <option value="fitness">Fitness</option>
+                      <option value="electronics">Electronics</option>
+                      <option value="retail">Retail</option>
+                      <option value="services">Services</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                    <input
+                      type="date"
+                      name="startDate"
+                      value={newPromotion.startDate}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                    <input
+                      type="date"
+                      name="endDate"
+                      value={newPromotion.endDate}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                  <select
+                    name="location"
+                    value={newPromotion.location}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="granada">Granada</option>
+                    <option value="sevilla">seville</option>
+                    <option value="madrid">Madrid</option>
+                    <option value="suburbs">Suburbs</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                  <input
+                    type="text"
+                    name="imageUrl"
+                    value={newPromotion.imageUrl}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => setIsAddingPromotion(false)}
+                  className="px-4 py-2 border cursor-pointer border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                  <button
+                  onClick={() => handleAddPromotion(user.id)}
+                  className="px-4 py-2 bg-blue-600 text-white cursor-pointer rounded-md hover:bg-blue-700"
+                >
+                  Add Promotion
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Promotions Grid */}
+        {filteredPromotions.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPromotions.map((promotion) => (
+              <Link 
+                key={promotion.id}
+                href={{pathname: `/${promotion.id}`}}
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow block"
+              >
+              {/* <RatingDisplay averageRating={parseFloat(promotion.starAverage)} reviewCount={promotion.numReviews} size="md"/> */}
+                <div className="h-48 overflow-hidden">
+                  <img
+                    src={promotion.imageUrl}
+                    alt={promotion.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                
+
+                <div className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-xl font-semibold text-gray-800">{promotion.title}</h3>
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">
+                      ${promotion.price}
+                    </span>
+                  </div>
+                  <RatingDisplay 
+                    averageRating={parseFloat(promotion.starAverage)} 
+                    reviewCount={promotion.numReviews} 
+                    size="sm"
+                  />
+                  <p className="text-gray-600 mb-3 pt-2">{promotion.description}</p>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
+                      {promotion.category}
+                    </span>
+                    <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
+                      {promotion.location}
+                    </span>
+                    <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
+                      {new Date(promotion.endDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-medium text-gray-600">No promotions found matching your filters</h3>
+            <button
+              onClick={() => {
+                setCategoryFilter('all');
+                setLocationFilter('all');
+                setPriceRange([0, 500]);
+              }}
+              className="mt-4 text-blue-600 hover:text-blue-800 cursor-pointer"
+            >
+              Clear all filters
+            </button>
+          </div>
+        )}
+      </main>
+    </div>
   );
-}
+};
+
+export default DiscoverPage;

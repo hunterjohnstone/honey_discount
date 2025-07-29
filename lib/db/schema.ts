@@ -11,7 +11,6 @@ import {
   numeric
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { number } from 'zod';
 
 
 export const products = pgTable('products', {
@@ -25,6 +24,7 @@ export const products = pgTable('products', {
   endDate: varchar('end_date', {length: 100}),
   location: varchar('location', {length: 100}),
   isActive: boolean('is_active'),
+  userId: integer('user_id').notNull().references(() => users.id), // ID of the user that added it
   starAverage: numeric({ precision: 2, scale: 1 }).default("0.0").notNull(),
   numReviews: integer("num_reviews").default(0).notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -45,13 +45,13 @@ export const users = pgTable('users', {
 export const productReviews = pgTable('product_reviews', {
   id: serial('id').primaryKey(),
   productId: integer('product_id').notNull().references(() => products.id, { onDelete: 'cascade' }),
-  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }), // Now users exists
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   rating: integer('rating').notNull(),
   comment: text('comment'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => ([  // Note: Returning an object, not array
-  index("review_product_idx").on(table.productId),  // Using table. not productReviews.
+}, (table) => ([ 
+  index("review_product_idx").on(table.productId),
   index("review_user_idx").on(table.userId),
   index("review_rating_idx").on(table.rating),
   uniqueIndex("unique_product_user_review").on(table.productId, table.userId)

@@ -53,6 +53,7 @@ async function createOffers() {
       endDate: '2023-06-30',
       location: 'granada',
       isActive: true,
+      userId: 1,
     },
     {
       title: 'Summer Fitness Package',
@@ -64,6 +65,7 @@ async function createOffers() {
       endDate: '2023-08-31',
       location: 'sevilla',
       isActive: true,
+      userId: 1,
     },
     {
       title: 'Tech Gadgets Sale',
@@ -75,6 +77,7 @@ async function createOffers() {
       endDate: '2023-06-20',
       location: 'madrid',
       isActive: true,
+      userId: 1,
     }
   ])
 }

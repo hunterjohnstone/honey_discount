@@ -32,17 +32,10 @@ function UserMenu() {
   if (!user) {
     return (
       <>
-        <Button className="text-black rounded-full bg-white cursor-pointer text-sm font-medium hover:bg-gray-200">
-          <Link
-            href="/pricing"
-          >
-            Pricing
-          </Link>
-        </Button>
         <Button asChild className="rounded-full cursor-pointer">
           <Link href="/sign-up">Sign Up</Link>
         </Button>
-        <Button className="rounded-full bg-white border-4 border-blue-300 hover:bg-gray-200 cursor-pointer text-black">
+        <Button className="rounded-full bg-white border-4 border-gray-200 hover:bg-gray-200 cursor-pointer text-black">
           <Link href="/sign-in">Sign In</Link>
         </Button>
       </>
@@ -54,19 +47,19 @@ function UserMenu() {
       <DropdownMenuTrigger>
         <Avatar className="cursor-pointer size-9">
           <AvatarImage alt={user.name || ''} />
-          <AvatarFallback>
-            {user.email
-              .split(' ')
-              .map((n) => n[0])
-              .join('')}
-          </AvatarFallback>
+          <AvatarFallback className="bg-gray-200 text-gray-700 font-medium">
+          {user.email
+            .split(' ')
+            .map((n) => n[0])
+            .join('')}
+        </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="flex flex-col gap-1">
         <DropdownMenuItem className="cursor-pointer">
-          <Link href="/dashboard" className="flex w-full items-center">
+          <Link href="/profile" className="flex w-full items-center">
             <Home className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
+            <span>Profile</span>
           </Link>
         </DropdownMenuItem>
         <form action={handleSignOut} className="w-full">

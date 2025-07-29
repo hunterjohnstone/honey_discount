@@ -13,6 +13,7 @@ export type Promotion = {
     isActive: boolean;
     starAverage: number;
     numReviews: number;
+    userId: number;
   };
 
 export const promotionsAtomState = atom<Promotion[]>([
@@ -25,10 +26,13 @@ export const promotionsAtomState = atom<Promotion[]>([
         category: 'food',
         startDate: new Date().toISOString().split('T')[0],
         endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        location: '',
+        location: 'granada',
         isActive: false,
         numReviews: 0,
         starAverage: 0.0,
+        userId: 1,
     }
   ]
 );
+
+export const isAddingPromotionAtom = atom<Boolean>(false)

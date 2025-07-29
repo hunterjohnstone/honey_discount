@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Users, Settings, Shield, Activity, Menu } from 'lucide-react';
+import { Users, Settings, Activity, Menu, Home } from 'lucide-react';
 
 export default function DashboardLayout({
   children
@@ -15,9 +15,9 @@ export default function DashboardLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navItems = [
-    { href: '/dashboard', icon: Users, label: 'Dashboard' },
-    { href: '/dashboard/account_settings', icon: Settings, label: 'Account settings' },
-    { href: '/dashboard/activity', icon: Activity, label: 'Activity' }
+    { href: '/', icon: Home, label: "Discovery" },
+    { href: '/profile', icon: Users, label: 'Profile' },
+    { href: '/profile/account_settings', icon: Settings, label: 'Account settings' },
   ];
 
   return (
@@ -52,7 +52,7 @@ export default function DashboardLayout({
                 <Button
                   variant={pathname === item.href ? 'secondary' : 'ghost'}
                   className={`shadow-none my-1 w-full justify-start cursor-pointer ${
-                    pathname === item.href ? 'bg-gray-100' : ''
+                    pathname === item.href ? 'bg-gray-200' : ''
                   }`}
                   onClick={() => setIsSidebarOpen(false)}
                 >

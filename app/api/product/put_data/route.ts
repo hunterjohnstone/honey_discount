@@ -1,21 +1,7 @@
+import { Promotion } from '@/app/(dashboard)/profile/atom_state';
 import { db } from '@/lib/db/drizzle';
 import { products } from '@/lib/db/schema';
-import { StringChunk } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
-import { v4 as uuidv4 } from 'uuid';
-
-type Promotion = {
-    id: string;
-    title: string;
-    description: string;
-    price: number;
-    imageUrl: string;
-    category: string;
-    startDate: string;
-    endDate: string;
-    location: string;
-    isActive: boolean;
-  };
 
 
   export async function POST(request: Request) {
@@ -31,6 +17,7 @@ type Promotion = {
         endDate: data.endDate,
         location: data.location,
         isActive: data.isActive,
+        userId: data.userId,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
