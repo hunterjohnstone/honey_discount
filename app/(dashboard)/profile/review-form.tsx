@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { User } from '@/lib/db/schema';
 import Link from 'next/link';
+// import { Router } from 'next/router';
 
 type Review = {
     userName: string | null;
@@ -31,6 +32,7 @@ function StarIcon({ className }: { className?: string }) {
 export function ReviewForm({ productId }: { 
     productId: number, 
   }) {
+    // const router = useRouter();
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
     const [comments, setComments] = useState<Review[]>([])
@@ -85,9 +87,9 @@ export function ReviewForm({ productId }: {
         const newComments = [...comments, commentObj]; // Creates a new array
         setComments(newComments)
         
-        // router.refresh();
         setComment('');
         setRating(0);
+        // router.refresh();
       } catch (error) {
         console.error('Failed to submit review:', error);
       } finally {

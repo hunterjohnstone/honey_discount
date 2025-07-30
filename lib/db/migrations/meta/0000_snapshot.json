@@ -1,5 +1,5 @@
 {
-  "id": "537f37c8-6c85-407a-954d-40b014a3dd52",
+  "id": "a064376c-65f1-4234-9779-e7a4f50260e1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -256,7 +256,26 @@
         },
         "price": {
           "name": "price",
-          "type": "integer",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0.0'"
+        },
+        "old_price": {
+          "name": "old_price",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "discount": {
+          "name": "discount",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "long_description": {
+          "name": "long_description",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },

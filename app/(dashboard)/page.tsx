@@ -6,44 +6,15 @@ import Error from 'next/error';
 import useSWR from 'swr';
 import { User } from '@/lib/db/schema';
 import Link from 'next/link';
-import { useSetAtom } from 'jotai';
-import { promotionsAtomState } from './profile/atom_state';
+import { useAtom, useSetAtom } from 'jotai';
+import { isAddingPromotionAtom, promotionsAtomState } from './profile/atom_state';
 import { ProductSchema, transformPromotionObject } from './transform';
 import { RatingDisplay } from './startDisplay';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import AddPromotionSection from './promotionForms/addPromotion';
+import { basePromoObject, Promotion } from './promotionForms/types';
 
-
-type Promotion = {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  category: string;
-  startDate: string;
-  endDate: string;
-  location: string;
-  isActive: boolean;
-  starAverage: string;
-  numReviews: number;
-  userId: number;
-};
-
-type InputPromotionSchema = {
-  id: string;
-  title: string;
-  description: string;
-  price: string;
-  imageUrl: string;
-  category: string;
-  startDate: string;
-  endDate: string;
-  location: string;
-  isActive: boolean;
-  numReviews: number;
-  starAverage: string;
-};
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -51,19 +22,8 @@ const DiscoverPage = () => {
   const router = useRouter();
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [filteredPromotions, setFilteredPromotions] = useState<Promotion[]>([]);
-  const [isAddingPromotion, setIsAddingPromotion] = useState(false);
-  const [newPromotion, setNewPromotion] = useState<Omit<InputPromotionSchema, 'id' | 'isActive'>>({
-    title: '',
-    description: '',
-    price: '0',
-    imageUrl: '',
-    category: 'food',
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    location: '',
-    numReviews: 0,
-    starAverage: "0.0",
-  });
+  const [isAddingPromotion, setIsAddingPromotion] = useAtom(isAddingPromotionAtom);
+  // const [newPromotion, setNewPromotion] = useState<Omit<Promotion, 'id' | 'isActive' | 'userId'>>(basePromoObject);
   
   const setNewPromotionsAtom = useSetAtom(promotionsAtomState)
 
@@ -72,35 +32,36 @@ const DiscoverPage = () => {
 
   // Filters
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 200]);
   const [locationFilter, setLocationFilter] = useState<string>('all');
 
   useEffect(() => {
     // Retrieve data from the DB via API call
-    const fetchData = async () => {
-      try {
-        //get product data from api
-        const response = await fetch('/api/product/get_data');
-        const data = await response.json();
-
-        console.log("data in frontend is: ", data)
-        
-        //transform the data
-        const transformedPromotions = data.map((offer : z.infer<typeof ProductSchema>) => transformPromotionObject(offer));
-
-        setNewPromotionsAtom(transformedPromotions)
-
-        //save it in state
-        setPromotions(transformedPromotions);
-        setFilteredPromotions(transformedPromotions);
-        console.log("filtered promotions: ",filteredPromotions)
-      } catch (error) {
-        console.log("you fucked up at fetch offers", error);
-        return Error
-      }
-    };
     fetchData();
   }, [router]);
+
+  const fetchData = async () => {
+    try {
+      //get product data from api
+      const response = await fetch('/api/product/get_data');
+      const data = await response.json();
+
+      console.log("data in frontend is: ", data)
+      
+      //transform the data
+      // const transformedPromotions = data.map((offer : z.infer<typeof ProductSchema>) => transformPromotionObject(offer));
+
+      setNewPromotionsAtom(data)
+
+      //save it in state
+      setPromotions(data);
+      setFilteredPromotions(data);
+      console.log("filtered promotions: ",filteredPromotions)
+    } catch (error) {
+      console.log("you fucked up at fetch offers", error);
+      return Error
+    }
+  };
 
   useEffect(() => {
     // Apply filters
@@ -111,54 +72,12 @@ const DiscoverPage = () => {
     if (locationFilter !== 'all') {
       results = results.filter(p => p.location === locationFilter);
     }
-    results = results.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+    const priceNum = 
+    results = results.filter(p => parseFloat(p.price) >= priceRange[0] && parseFloat(p.price) <= priceRange[1]);
     
     setFilteredPromotions(results);
   }, [categoryFilter, locationFilter, priceRange, promotions]);
 
-  const handleAddPromotion = async (userId: number) => {
-    const promotionToAdd: Promotion = {
-      ...newPromotion,
-      userId,
-      price: z.coerce.number().parse(newPromotion.price), //price stored as a number so we coerce it
-      id: Math.random().toString(36).substring(2, 9),
-      isActive: true,
-
-    };
-
-    //TODO before moving to prod, add the REAL API endpoints in .env
-      await fetch('/api/product/put_data', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add other headers if needed (e.g., Authorization)
-        },
-        body: JSON.stringify(promotionToAdd),
-      });
-    
-    setPromotions([...promotions, promotionToAdd]);
-    setIsAddingPromotion(false);
-    setNewPromotion({
-      title: '',
-      description: '',
-      price: '0',
-      imageUrl: '',
-      category: 'food',
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      location: '',
-      starAverage: "0.0",
-      numReviews: 0
-    });
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setNewPromotion({
-      ...newPromotion,
-      [name]: name === 'price' ? parseFloat(value) : value,
-    });
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -217,156 +136,25 @@ const DiscoverPage = () => {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price Range: ${priceRange[0]} - ${priceRange[1]}
+                Price Range: €{priceRange[0]} - €{priceRange[1]}
               </label>
               <div className="flex items-center space-x-4">
                 <input
                   type="range"
                   min="0"
-                  max="500"
+                  max="200"
                   step="5"
                   value={priceRange[1]}
                   onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                  className="w-full"
+                  className="w-full cursor-pointer"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Add Promotion Modal */}
-        {isAddingPromotion && user && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
-              <h2 className="text-2xl font-bold mb-4 text-gray-800">Add New Promotion</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={newPromotion.title}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    placeholder="Promotion title"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea
-                    name="description"
-                    value={newPromotion.description}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    rows={3}
-                    placeholder="Detailed description of the promotion"
-                  />
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
-                    <input
-                      type="number"
-                      name="price"
-                      value={newPromotion.price}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                      placeholder="0.00"
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select
-                      name="category"
-                      value={newPromotion.category}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    >
-                      <option value="food">Food & Dining</option>
-                      <option value="fitness">Fitness</option>
-                      <option value="electronics">Electronics</option>
-                      <option value="retail">Retail</option>
-                      <option value="services">Services</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                    <input
-                      type="date"
-                      name="startDate"
-                      value={newPromotion.startDate}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                    <input
-                      type="date"
-                      name="endDate"
-                      value={newPromotion.endDate}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                  <select
-                    name="location"
-                    value={newPromotion.location}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  >
-                    <option value="granada">Granada</option>
-                    <option value="sevilla">seville</option>
-                    <option value="madrid">Madrid</option>
-                    <option value="suburbs">Suburbs</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                  <input
-                    type="text"
-                    name="imageUrl"
-                    value={newPromotion.imageUrl}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
-              </div>
-              
-              <div className="flex justify-end space-x-3 mt-6">
-                <button
-                  onClick={() => setIsAddingPromotion(false)}
-                  className="px-4 py-2 border cursor-pointer border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                  <button
-                  onClick={() => handleAddPromotion(user.id)}
-                  className="px-4 py-2 bg-blue-600 text-white cursor-pointer rounded-md hover:bg-blue-700"
-                >
-                  Add Promotion
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {isAddingPromotion && user && <AddPromotionSection userId={user.id} onSuccess={fetchData}></AddPromotionSection>}
 
-        {/* Promotions Grid */}
         {filteredPromotions.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredPromotions.map((promotion) => (
@@ -375,26 +163,25 @@ const DiscoverPage = () => {
                 href={{pathname: `/${promotion.id}`}}
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow block"
               >
-              {/* <RatingDisplay averageRating={parseFloat(promotion.starAverage)} reviewCount={promotion.numReviews} size="md"/> */}
-                <div className="h-48 overflow-hidden">
-                  <img
-                    src={promotion.imageUrl}
-                    alt={promotion.title}
-                    className="w-full h-full object-cover"
-                  />
+              <div className="h-48 overflow-hidden relative">
+                <div className="absolute top-2 right-2 bg-red-600 text-white text-sm font-bold px-2.5 py-1 rounded-full z-10 shadow-md transform rotate-6 hover:rotate-0 transition-transform">
+                  {`${promotion.discount} OFF`}
                 </div>
-
-                
-
+                <img
+                  src={promotion.imageUrl}
+                  alt={promotion.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
                 <div className="p-4">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-xl font-semibold text-gray-800">{promotion.title}</h3>
                     <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">
-                      ${promotion.price}
+                      €{promotion.price}
                     </span>
                   </div>
                   <RatingDisplay 
-                    averageRating={parseFloat(promotion.starAverage)} 
+                    averageRating={promotion.starAverage} 
                     reviewCount={promotion.numReviews} 
                     size="sm"
                   />
@@ -421,7 +208,7 @@ const DiscoverPage = () => {
               onClick={() => {
                 setCategoryFilter('all');
                 setLocationFilter('all');
-                setPriceRange([0, 500]);
+                setPriceRange([0, 200]);
               }}
               className="mt-4 text-blue-600 hover:text-blue-800 cursor-pointer"
             >

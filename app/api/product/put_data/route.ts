@@ -1,4 +1,4 @@
-import { Promotion } from '@/app/(dashboard)/profile/atom_state';
+import { Promotion } from '@/app/(dashboard)/promotionForms/types';
 import { db } from '@/lib/db/drizzle';
 import { products } from '@/lib/db/schema';
 import { NextResponse } from 'next/server';
@@ -10,7 +10,7 @@ import { NextResponse } from 'next/server';
       await db.insert(products).values({
         title: data.title,
         description: data.description,
-        price: data.price,
+        price: data.price.toString(),
         imageUrl: data.imageUrl,
         category: data.category,
         startDate: data.startDate,

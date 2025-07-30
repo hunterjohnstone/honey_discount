@@ -46,7 +46,7 @@ async function createOffers() {
     {
       title: 'Weekend Brunch Special',
       description: '20% off all brunch stuff',
-      price: 25,
+      price: "20",
       imageUrl: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
       category: 'food',
       startDate: '2023-06-01',
@@ -54,11 +54,13 @@ async function createOffers() {
       location: 'granada',
       isActive: true,
       userId: 1,
+      longDescription: "The first light of dawn spills over the horizon, painting the sky in soft hues of pink and gold, as the farmer’s market begins to stir to life. The air is crisp and carries the earthy scent of dew-kissed vegetables, freshly baked bread, and bundles of herbs still damp from the morning harvest. Wooden stalls, weathered by seasons of use, are arranged in neat rows, their canopies fluttering slightly in the gentle breeze. Vendors, their hands calloused from years of labor, meticulously arrange their produce—plump tomatoes gleaming like rubies, leafy greens stacked in vibrant pyramids, and baskets of berries so ripe they seem to glow under the rising sun.",
+      discount: "10%"
     },
     {
       title: 'Summer Fitness Package',
       description: '3 months of gym membership half price.',
-      price: 120,
+      price: "45",
       imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
       category: 'fitness',
       startDate: '2023-06-15',
@@ -66,11 +68,13 @@ async function createOffers() {
       location: 'sevilla',
       isActive: true,
       userId: 1,
+      discount: "30%",
+      longDescription: "At the center of the square, a coffee cart exhales fragrant steam, its proprietor grinding beans with rhythmic precision. The rich, smoky aroma mingles with the sweetness of pastries from the neighboring baker, whose flaky croissants and crusty sourdough loaves are still warm from the oven. Nearby, a flower seller drapes garlands of lavender and sunflowers over her stall, their petals trembling as she adjusts them. Honeybees, drawn by the blossoms, hover lazily in the air, their hum blending with the murmur of early shoppers. \n The market is a symphony of sounds—the crunch of gravel underfoot, the clink of glass jars filled with preserves, the occasional burst of laughter between farmers who’ve known each other for decades. A fiddler tunes his instrument at the far end, his notes tentative but warm, promising lively tunes once the crowd thickens. Children dart between stalls, their fingers sticky from stolen samples of fruit, while elderly couples move slowly, inspecting each peach and cucumber with practiced eyes.",
     },
     {
       title: 'Tech Gadgets Sale',
       description: '30% off electronics.',
-      price: 299,
+      price: "199",
       imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
       category: 'electronics',
       startDate: '2023-06-10',
@@ -78,6 +82,8 @@ async function createOffers() {
       location: 'madrid',
       isActive: true,
       userId: 1,
+      discount: "25%",
+      longDescription: "As the sun climbs higher, the market swells with energy. A fishmonger shouts prices over the din, his ice-packed counter glistening with silvery mackerel and rosy fillets of salmon. A cheesemonger offers slivers of aged gouda to passersby, its nutty richness lingering on the tongue. The scent of sizzling sausages from a food truck cuts through the sweetness, drawing a line of hungry patrons.",
     }
   ])
 }

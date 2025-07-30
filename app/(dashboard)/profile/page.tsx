@@ -6,43 +6,13 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { MoreVertical, PencilIcon, TrashIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import z from 'zod';
 import useSWR from 'swr';
 import { User } from '@/lib/db/schema';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { isAddingPromotionAtom } from './atom_state';
-import AddPromotionSection from '../addPromotion';
-
-type Promotion = {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  category: string;
-  startDate: string;
-  endDate: string;
-  location: string;
-  isActive: boolean;
-  starAverage: string;
-  numReviews: number;
-  userId: number;
-};
-
-type InputPromotionSchema = {
-  id: string;
-  title: string;
-  description: string;
-  price: string;
-  imageUrl: string;
-  category: string;
-  startDate: string;
-  endDate: string;
-  location: string;
-  isActive: boolean;
-  numReviews: number;
-  starAverage: string;
-};
+import { useAtom } from 'jotai';
+import { isAddingPromotionAtom, isEditingPromotionAtom } from './atom_state';
+import AddPromotionSection from '../promotionForms/addPromotion';
+import EditPromotion from '../promotionForms/editPromotion';
+import { Promotion } from '../promotionForms/types';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -53,56 +23,66 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Promotion>>({});
-  const [isAddingPromotion, setIsAddingPromotionAtom] = useAtom(isAddingPromotionAtom);
-  // const [isAddingPromotion, setIsAddingPromotion] = useState(false);
-  const [newPromotion, setNewPromotion] = useState<Omit<InputPromotionSchema, 'id' | 'isActive'>>({
+  const [ promotionToEdit, setPromotionToEdit] = useState<Promotion>({
+    id: '',
     title: '',
     description: '',
-    price: '0',
+    price: "0.0",
     imageUrl: '',
     category: 'food',
     startDate: new Date().toISOString().split('T')[0],
     endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    location: '',
+    location: 'granada',
+    isActive: false,
     numReviews: 0,
-    starAverage: "0.0",
-  });
-  const {data: user } = useSWR<User>('/api/user', fetcher)
+    starAverage: 0,
+    userId: 1,
+    longDescription: "",
+    discount: "0%"
+});
+const {data: user } = useSWR<User>('/api/user', fetcher);
 
 
+  const [isAddingPromotion, setIsAddingPromotionAtom] = useAtom(isAddingPromotionAtom);
+  const [isEditingPromotion, setIsEditingPromotion ] = useAtom(isEditingPromotionAtom);
 
-  // Fetch user's promotions
   useEffect(() => {
-    const fetchUserPromotions = async () => {
-      try {
-        const response = await fetch('/api/product/get_data');
-        if (!response.ok) throw new Error('Failed to fetch promotions');
-        const data: Promotion[] = await response.json();
-        setPromotions(data.filter((promotion) => promotion.userId === user?.id));
-      } catch (error) {
-        toast.error('Error loading your promotions');
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserPromotions();
+    //Fetch promotions straight away
+    fetchPromotions();
   }, []);
+
+  const fetchPromotions = async () => {
+    try {
+      const response = await fetch('/api/product/get_data');
+      if (!response.ok) throw new Error('Failed to fetch promotions');
+      const data: Promotion[] = await response.json();
+      setPromotions(data.filter((promotion) => promotion.userId === user?.id));
+    } catch (error) {
+      toast.error('Error loading your promotions');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
   // Handle promotion deletion
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this promotion?')) return;
     
     try {
-      const response = await fetch(`/api/promotions/${id}`, {
+      const response = await fetch(`/api/product/remove_product`, {
         method: 'DELETE',
+        body: JSON.stringify({
+          id
+        })
       });
 
       if (response.ok) {
         setPromotions(promotions.filter(p => p.id !== id));
         toast.success('Promotion deleted successfully');
       } else {
+        toast.info('failed to Delete promotion');
         throw new Error('Failed to delete promotion');
       }
     } catch (error) {
@@ -220,11 +200,8 @@ export default function ProfilePage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           <DropdownMenuItem className="cursor-pointer" onClick={() => {
-                            setEditingId(promotion.id);
-                            setEditForm({
-                              title: promotion.title,
-                              description: promotion.description
-                            });
+                            setPromotionToEdit(promotion);
+                            setIsEditingPromotion(true);
                           }}>
                             <PencilIcon className="mr-2 h-4 w-4" />
                             Edit
@@ -250,7 +227,7 @@ export default function ProfilePage() {
                     />
                     <p className="text-gray-700">{promotion.description}</p>
                     <div className="mt-4 flex justify-between items-center">
-                      <span className="text-lg font-bold">${promotion.price}</span>
+                      <span className="text-lg font-bold">€{promotion.price}</span>
                       <span className="text-sm text-gray-500">
                         Ends: {new Date(promotion.endDate).toLocaleDateString()}
                       </span>
@@ -261,6 +238,7 @@ export default function ProfilePage() {
                     <div className="flex justify-between w-full">
                       <Button 
                         variant="outline" 
+                        className="cursor-pointer"
                         onClick={() => router.push(`/${promotion.id}`)}
                       >
                         View Details
@@ -277,11 +255,16 @@ export default function ProfilePage() {
         <div className="flex justify-between items-center mb-8 mt-8">
         <h1 className="text-3xl font-bold text-gray-800">Your favourite promotions</h1>
         </div>
-        This section is to come soon...
+        Coming soon...
         {/* Below is the adding promotion overlay */}
         <div>
-          {user && <AddPromotionSection userId={user?.id}></AddPromotionSection>} 
+          {user && isAddingPromotion && <AddPromotionSection userId={user?.id} onSuccess={fetchPromotions}></AddPromotionSection>} 
         </div>
+        {/* Below is the editing promotion overlay */}
+        <div>
+          {user && isEditingPromotion && <EditPromotion promotionToEdit={promotionToEdit} onSuccess={fetchPromotions}></EditPromotion>}
+        </div>
+
     </div>
   );
 }
