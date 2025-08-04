@@ -309,12 +309,10 @@ const updateAccountSchema = z.object({
 export const updateAccount = validatedActionWithUser(
   updateAccountSchema,
   async (data, formData, user) => {  // Add formData parameter
-    console.log("Raw formData entries:");
     for (const [key, value] of formData.entries()) {
       console.log(key, value);
     }
     
-    console.log("Validated data:", data);
     const { name, email } = data;
     const userWithTeam = await getUserWithTeam(user.id);
 

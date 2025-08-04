@@ -1,0 +1,381 @@
+import { useForm } from 'react-hook-form';
+import { useSetAtom } from "jotai";
+import { useRouter } from "next/navigation";
+import { isAddingPromotionAtom } from "../profile/atom_state";
+import { basePromoObject, Promotion } from "./types";
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+const safeDateDisplay = (dateString: string | undefined, fallback = '') => {
+  if (!dateString) return fallback;
+  try {
+    return new Date(dateString).toLocaleDateString();
+  } catch {
+    return fallback;
+  }
+};
+
+// Define validation schema
+const promotionSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  category: z.string().min(1, 'Category is required'),
+  description: z.string().min(1, 'Description is required').max(100, "Brief description is maximum 100 characters"),
+  longDescription: z.string().min(1, 'Detailed description is required'),
+  price: z.string().min(1, 'Price is required').regex(/^\d*\.?\d{0,2}$/, 'Invalid price format (e.g. 12.99)'),
+  oldPrice: z.string().min(1, 'Original price is required').regex(/^\d*\.?\d{0,2}$/, 'Invalid price format (e.g. 24.99)'),
+  location: z.string().min(1, 'Location is required'),
+  startDate: z.string()
+    .optional()
+    .refine(val => !val || !isNaN(new Date(val).getTime()), {
+      message: "Invalid start date",
+    }),
+  endDate: z.string()
+    .optional()
+    .refine(val => !val || !isNaN(new Date(val).getTime()), {
+      message: "Invalid end date",
+    }),
+  imageUrl: z.string(),
+}).refine(
+  data => !data.endDate || !data.startDate || new Date(data.endDate) >= new Date(data.startDate),
+  {
+    message: "End date must be after start date",
+    path: ["endDate"],
+  }
+);;
+
+type PromotionFormData = z.infer<typeof promotionSchema>;
+
+export default function AddPromoForm({ userId, onSuccess }: {
+  userId: number,
+  onSuccess: () => void
+}) {
+  const router = useRouter();
+  const setIsAddingPromotion = useSetAtom(isAddingPromotionAtom);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    watch,
+    setValue,
+    trigger,
+  } = useForm<PromotionFormData>({
+    resolver: zodResolver(promotionSchema),
+    defaultValues: {
+      ...basePromoObject,
+      price: '',
+      oldPrice: '',
+      imageUrl: "https://t3.ftcdn.net/jpg/11/86/32/62/360_F_1186326217_w0LDFI0Mv6G8gJnSBypbcVWvX1KWyDh0.jpg"
+    }
+  });
+
+  const handlePriceChange = (field: 'price' | 'oldPrice', e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow empty string, numbers, and one decimal point
+    if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+      setValue(field, value);
+      trigger(field); // Trigger validation after change
+    }
+  };
+
+  const onSubmit = async (data: PromotionFormData) => {
+    try {
+      // Convert string prices to numbers
+      const priceValue = parseFloat(data.price);
+      const oldPriceValue = parseFloat(data.oldPrice);
+      
+      // Validate that discounted price is lower than original
+      if (priceValue >= oldPriceValue) {
+        alert('Discounted price must be lower than original price');
+        return;
+      }
+      const discount = Math.round((1 - parseFloat(watch('price')) / parseFloat(watch('oldPrice'))) * 100).toString();      
+
+      const promotionToAdd: Omit<Promotion, "id" | "numReviews" | "starAverage" | "reported">  = {
+        title: data.title,
+        description: data.description,
+        longDescription: data.longDescription,
+        price: data.price,
+        oldPrice:data.oldPrice,
+        discount: discount + "%",
+        category: data.category,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        location: data.location,
+        imageUrl: data.imageUrl || "https://t3.ftcdn.net/jpg/11/86/32/62/360_F_1186326217_w0LDFI0Mv6G8gJnSBypbcVWvX1KWyDh0.jpg",
+        userId,
+        isActive: true,
+      };
+
+      await fetch('/api/product/put_data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(promotionToAdd),
+      });
+
+      onSuccess();
+      router.refresh();
+      setIsAddingPromotion(false);
+    } catch (error) {
+      console.error('Error creating promotion:', error);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl border border-gray-100 flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className="flex justify-between items-center p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
+          <h2 className="text-2xl font-bold text-gray-800">Create New Promotion</h2>
+          <button
+            onClick={() => setIsAddingPromotion(false)}
+            className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1"
+            aria-label="Close"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit(onSubmit)} className="relative flex-1 overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          <div className="p-6 space-y-5 pb-8">
+            {/* Title and Category */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-1">
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title*</label>
+                <input
+                  id="title"
+                  {...register('title')}
+                  className={`w-full px-3 py-2 border ${errors.title ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  placeholder="Summer Special"
+                />
+                {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
+              </div>
+              
+              <div className="space-y-1">
+                <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category*</label>
+                <select
+                  id="category"
+                  {...register('category')}
+                  className={`w-full px-3 py-2 border ${errors.category ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                >
+                  <option value="">Select a category</option>
+                  <option value="food">Food & Dining</option>
+                  <option value="fitness">Fitness</option>
+                  <option value="electronics">Electronics</option>
+                  <option value="retail">Retail</option>
+                  <option value="services">Services</option>
+                </select>
+                {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>}
+              </div>
+            </div>
+
+            {/* Descriptions */}
+            <div className="space-y-1">
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700">Short Description*</label>
+              <textarea
+                id="description"
+                {...register('description')}
+                className={`w-full px-3 py-2 border ${errors.description ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                rows={3}
+                placeholder="Brief description that will appear in listings..."
+              />
+              {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
+            </div>
+
+            <div className="space-y-1">
+              <label htmlFor="longDescription" className="block text-sm font-medium text-gray-700">Full Details*</label>
+              <textarea
+                id="longDescription"
+                {...register('longDescription')}
+                className={`w-full px-3 py-2 border ${errors.longDescription ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                rows={5}
+                placeholder="Complete details about your promotion..."
+              />
+              {errors.longDescription && <p className="mt-1 text-sm text-red-600">{errors.longDescription.message}</p>}
+            </div>
+
+            {/* Prices */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Discounted Price */}
+              <div className="space-y-1">
+                <label htmlFor="price" className="block text-sm font-medium text-gray-700">Discounted Price (€)*</label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">€</span>
+                  <input
+                    id="price"
+                    {...register('price')}
+                    onChange={(e) => handlePriceChange('price', e)}
+                    value={watch('price')}
+                    className={`w-full pl-8 pr-3 py-2 border ${errors.price ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                    placeholder="19.99"
+                    inputMode="decimal"
+                  />
+                </div>
+                {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>}
+              </div>
+              
+              {/* Original Price */}
+              <div className="space-y-1">
+                <label htmlFor="oldPrice" className="block text-sm font-medium text-gray-700">Original Price (€)*</label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">€</span>
+                  <input
+                    id="oldPrice"
+                    {...register('oldPrice')}
+                    onChange={(e) => handlePriceChange('oldPrice', e)}
+                    value={watch('oldPrice')}
+                    className={`w-full pl-8 pr-3 py-2 border ${errors.oldPrice ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                    placeholder="24.99"
+                    inputMode="decimal"
+                  />
+                </div>
+                {errors.oldPrice && <p className="mt-1 text-sm text-red-600">{errors.oldPrice.message}</p>}
+                {watch('oldPrice') && watch('price') && (
+                  <p className="mt-1 text-sm text-green-600">
+                    Discount: {Math.round((1 - parseFloat(watch('price')) / parseFloat(watch('oldPrice'))) * 100)}%
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Location and Dates */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-1">
+                <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location*</label>
+                <select
+                  id="location"
+                  {...register('location')}
+                  className={`w-full px-3 py-2 border ${errors.location ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                >
+                  <option value="">Select location</option>
+                  <option value="granada">Granada</option>
+                  <option value="sevilla">Seville</option>
+                  <option value="madrid">Madrid</option>
+                  <option value="suburbs">Suburbs</option>
+                </select>
+                {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Start Date - Optional */}
+              <div className="space-y-1">
+                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
+                  Start Date (optional)
+                </label>
+                <div className="relative">
+                  <input
+                    id="startDate"
+                    type="date"
+                    {...register('startDate')}
+                    className={`w-full px-3 py-2 border pr-8 ${
+                      errors.startDate ? 'border-red-500' : 'border-gray-300'
+                    } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setValue('startDate', '', { shouldValidate: true })}
+                    className="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
+                    aria-label="Clear start date"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 pt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+                {errors.startDate && (
+                  <p className="mt-1 text-sm text-red-600">{errors.startDate.message}</p>
+                )}
+              </div>
+
+              {/* End Date - Optional */}
+              <div className="space-y-1">
+                <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
+                  End Date (optional)
+                  <span className="ml-1 text-xs text-gray-500">(must be after {safeDateDisplay(watch('startDate'), 'start date')})</span>
+                </label>
+                <div className="relative">
+                  <input
+                    id="endDate"
+                    type="date"
+                    {...register('endDate')}
+                    min={watch('startDate') || undefined}
+                    className={`w-full px-3 py-2 border pr-10 ${
+                      errors.endDate ? 'border-red-500' : 'border-gray-300'
+                    } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                    disabled={!watch('startDate')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setValue('endDate', '', { shouldValidate: true })}
+                    className="absolute right-4 top-2 text-gray-400 hover:text-gray-600"
+                    aria-label="Clear end date"
+                    disabled={!watch('startDate')}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 pt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+                {errors.endDate && (
+                  <p className="mt-1 text-sm text-red-600">{errors.endDate.message}</p>
+                )}
+              </div>
+            </div>
+            {watch('startDate') && watch('endDate') && (
+            <div className="mt-2 text-sm text-green-600">
+              Promotion period: { new Date(safeDateDisplay(watch('startDate'))).toLocaleDateString()} to {new Date(safeDateDisplay(watch('endDate'))).toLocaleDateString()}
+            </div>
+          )}
+            {/* Image URL */}
+            <div className="space-y-1">
+              <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">Image URL*</label>
+              <input
+                id="imageUrl"
+                type="url"
+                {...register('imageUrl')}
+                className={`w-full px-3 py-2 border ${errors.imageUrl ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                placeholder="https://example.com/image.jpg"
+              />
+              {errors.imageUrl && <p className="mt-1 text-sm text-red-600">{errors.imageUrl.message}</p>}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setIsAddingPromotion(false)}
+                className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating...
+                  </span>
+                ) : (
+                  'Create Promotion'
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

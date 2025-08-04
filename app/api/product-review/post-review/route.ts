@@ -10,8 +10,8 @@ type RequestType = {
     userId: number;
 }
 
-// 1. Post rating and comment information for given users in the productReviews table
-// 2. Update the average star rating and the total reviews left
+//Post rating and comment information for given users in the productReviews table
+//Update the average star rating and the total reviews left
 export async function POST(request: Request) {
     try {
         const data : RequestType = await request.json();

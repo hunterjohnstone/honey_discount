@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { User } from '@/lib/db/schema';
 import Link from 'next/link';
+import { toast } from 'react-toastify';
 // import { Router } from 'next/router';
 
 type Review = {
@@ -44,10 +45,8 @@ export function ReviewForm({ productId }: {
   const fetchData = async () => {
     try {
         const res = await fetch(`/api/product-review/get-review?productId=${productId}`)
-        console.log("response is: ", res);
         const data = await res.json();
 
-        console.log("comment and review data is: ", data);
         setComments(data)
     } catch (error) {
         console.log("Error fetching data: ", error);
@@ -59,12 +58,13 @@ export function ReviewForm({ productId }: {
     useEffect(() => {
       fetchData();
     }, [])
+    
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       setIsSubmitting(true);
-      
+
       try {
-        await fetch('/api/product-review/post-review', {
+        const response = await fetch('/api/product-review/post-review', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -76,23 +76,32 @@ export function ReviewForm({ productId }: {
             userId: user?.id
           })
         });
-
-        const commentObj = {
-            userName: user?.name || "UNKNOWN",
-            comment: comment,
-            date: new Date(),
-            rating: rating,
+    
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.message || 
+            `Server responded with ${response.status}: ${response.statusText}`
+          );
         }
-
-        const newComments = [...comments, commentObj]; // Creates a new array
-        setComments(newComments)
+    
+        const commentObj = {
+          userName: user?.name || "Anonymous",
+          comment: comment,
+          date: new Date(),
+          rating: rating,
+        };
         
+        setComments(prev => [...prev, commentObj]);
+        toast.success("Thank you for your review!");
+    
+      } catch (error) {
+        console.error('Review submission failed:', error);
+        toast.error("Failed to submit review");
+        
+      } finally {
         setComment('');
         setRating(0);
-        // router.refresh();
-      } catch (error) {
-        console.error('Failed to submit review:', error);
-      } finally {
         setIsSubmitting(false);
       }
     };

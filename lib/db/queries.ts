@@ -1,4 +1,4 @@
-import { desc, and, eq, isNull } from 'drizzle-orm';
+import { desc, and, eq, isNull, StringChunk } from 'drizzle-orm';
 import { db } from './drizzle';
 import { activityLogs, products, teamMembers, teams, users } from './schema';
 import { cookies } from 'next/headers';
@@ -6,6 +6,7 @@ import { verifyToken } from '@/lib/auth/session';
 import { resumePluginState } from 'next/dist/build/build-context';
 import { productReviews } from "./schema"; // Import your schema tables
 import { number } from 'zod';
+import { Promotion } from '@/app/(dashboard)/promotionForms/types';
 
 
 export async function getUser() {
@@ -133,9 +134,48 @@ export async function getTeamForUser() {
   return result?.team || null;
 };
 
+//Need to transform reported string to readable array
+interface ProductReport {
+  id: number;
+  report: string;
+}
+
+const parseReported = (reportedString: string) => {
+  try {
+    // Handle empty or invalid cases
+    if (!reportedString || reportedString === '[]') return [];
+    
+    // Fix common string formatting issues
+    const fixedString = reportedString
+      .replace(/(\w+):/g, '"$1":')  // Add quotes around keys
+      .replace(/'/g, '"')           // Replace single quotes with double
+      .replace(/\\"/g, '"')         // Remove escape characters
+      .replace(/object Object/g, ''); // Remove "object Object" text
+    
+    // Parse the JSON string
+    const parsed = JSON.parse(`[${fixedString}]`) as ProductReport[];
+    
+    // Validate and transform the parsed data
+    return parsed.map(item => ({
+      ...item,
+    })) as ProductReport[];
+    
+  } catch (error) {
+    console.error('Failed to parse reported data:', error);
+    return [];
+  }
+}
+
+
 export async function getProductData() {
   const results = await db.query.products.findMany();
-  return results;
+  const data = results.map((product) => {
+    return {
+      ...product,
+      reported: parseReported(product.reported || "[]")
+    }
+  })
+  return data;
 }
 
 

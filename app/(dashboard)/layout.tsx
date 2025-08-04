@@ -57,7 +57,7 @@ function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="flex flex-col gap-1">
         <DropdownMenuItem className="cursor-pointer">
-          <Link href="/profile" className="flex w-full items-center">
+          <Link href="/profile" className="flex w-full items-center" onClick={() => setIsMenuOpen(false)}>
             <Home className="mr-2 h-4 w-4" />
             <span>Profile</span>
           </Link>
@@ -65,7 +65,7 @@ function UserMenu() {
         <form action={handleSignOut} className="w-full">
           <button type="submit" className="flex w-full">
             <DropdownMenuItem className="w-full flex-1 cursor-pointer">
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut className="mr-2 h-4 w-4" onClick={() => setIsMenuOpen(false)} />
               <span>Sign out</span>
             </DropdownMenuItem>
           </button>

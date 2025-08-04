@@ -12,7 +12,7 @@ export default function EditPromotion({ promotionToEdit, onSuccess } : {
     const [price, setPrice] = useState<string>(promotionToEdit.price);
     const [error, setError] = useState<string | null>(null);
     const setIsEditingPromotion = useSetAtom(isEditingPromotionAtom);
-    const [promotion, setPromotion] = useState<Omit<Promotion,| 'isActive' | 'string'>>({
+    const [promotion, setPromotion] = useState<Omit<Promotion,| 'isActive' | 'string' >>({
         ...promotionToEdit,
         price: promotionToEdit.price.toString(),
     });
@@ -29,7 +29,7 @@ export default function EditPromotion({ promotionToEdit, onSuccess } : {
         //first need to validate price field
         const promotionToEdit: Promotion = {
             ...promotion,
-            price: price,
+            price,
             isActive: true,
             id: promotion.id,
         }
@@ -231,7 +231,7 @@ export default function EditPromotion({ promotionToEdit, onSuccess } : {
                     onClick={() => handleEditPromotion()}
                     className="cursor-pointer px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
-                    Create Promotion
+                    Edit Promotion
                 </button>
                 </div>
             </div>

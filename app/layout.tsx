@@ -3,10 +3,12 @@ import type { Metadata, Viewport } from 'next';
 import { Manrope } from 'next/font/google';
 import { getUser, getTeamForUser } from '@/lib/db/queries';
 import { SWRConfig } from 'swr';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const metadata: Metadata = {
-  title: 'Next.js SaaS Starter',
-  description: 'Get started quickly with Next.js, Postgres, and Stripe.'
+  title: 'Discount Granada',
+  description: 'Encuentra las mejores ofertas y descuentos en Granada!'
 };
 
 export const viewport: Viewport = {
@@ -29,14 +31,25 @@ export default function RootLayout({
         <SWRConfig
           value={{
             fallback: {
-              // We do NOT await here
-              // Only components that read this data will suspend
               '/api/user': getUser(),
               '/api/team': getTeamForUser()
             }
           }}
         >
           {children}
+          <ToastContainer
+            position="bottom-right"
+            // autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+            className="text-md"
+          />
         </SWRConfig>
       </body>
     </html>

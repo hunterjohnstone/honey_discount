@@ -1,3 +1,5 @@
+import { AnyActionArg } from "react";
+
 export type InputPromotionSchema = {
     id: string;
     title: string;
@@ -19,10 +21,12 @@ export type InputPromotionSchema = {
     title: string;
     description: string;
     price: string;
+    oldPrice: string;
     imageUrl: string;
     category: string;
-    startDate: string;
-    endDate: string;
+    startDate: string | undefined;
+    endDate: string | undefined;
+    reported: [];
     location: string;
     isActive: boolean;
     starAverage: number;
@@ -40,12 +44,14 @@ export type InputPromotionSchema = {
     price: '',
     imageUrl: '',
     category: 'food',
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    startDate: new Date().toISOString(),
+    endDate: undefined,
+    reported: [],
     location: 'granada',
     starAverage: 0,
     numReviews: 0,
     longDescription: "",
     isActive: true,
-    discount: "0%"
+    discount: "0%",
+    oldPrice: "",
   };

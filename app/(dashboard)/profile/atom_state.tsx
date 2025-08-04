@@ -6,6 +6,7 @@ export const promotionsAtomState = atom<Promotion[]>([
         id: '',
         title: '',
         description: '',
+        oldPrice: '0.0',
         price: "0.0",
         imageUrl: '',
         category: 'food',
@@ -17,7 +18,7 @@ export const promotionsAtomState = atom<Promotion[]>([
         starAverage: 0,
         userId: 1,
         longDescription: "",
-        discount: "0%"
+        discount: "0%",
     }
   ]
 );
@@ -27,6 +28,7 @@ export const editPromotionState = atom<Promotion>({
   title: '',
   description: '',
   price: "0.0",
+  oldPrice: '0.0',
   imageUrl: '',
   category: 'food',
   startDate: new Date().toISOString().split('T')[0],
@@ -41,3 +43,4 @@ export const editPromotionState = atom<Promotion>({
 });
 export const isEditingPromotionAtom = atom<Boolean>(false);
 export const isAddingPromotionAtom = atom<Boolean>(false);
+export const isReportingAtom = atom<Boolean>(false);

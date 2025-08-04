@@ -11,6 +11,7 @@ import {
   numeric
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import { ReportedObject } from '@/app/api/product/report/route';
 
 
 export const products = pgTable('products', {
@@ -27,6 +28,7 @@ export const products = pgTable('products', {
   endDate: varchar('end_date', {length: 100}),
   location: varchar('location', {length: 100}),
   isActive: boolean('is_active'),
+  reported: varchar('reported').default('[]'),
   userId: integer('user_id').notNull().references(() => users.id), // ID of the user that added it
   starAverage: numeric({ precision: 2, scale: 1 }).default("0.0").notNull(),
   numReviews: integer("num_reviews").default(0).notNull(),

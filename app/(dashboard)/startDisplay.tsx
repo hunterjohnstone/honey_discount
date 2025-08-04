@@ -77,11 +77,9 @@ export function RatingDisplay({
       <div className="flex items-center gap-1">
         <span className={`${sizeClasses[size].text} font-medium text-gray-900`}>
             {averageRating}
-          {/* {averageRating.toFixed(1)} */}
         </span>
         <span className="text-gray-500">·</span>
         <div
-        //   href="#reviews"
           className={`${sizeClasses[size].count} text-gray-600 hover:text-gray-900`}
         >
           {reviewCount} {reviewCount === 1 ? "review" : "reviews"}

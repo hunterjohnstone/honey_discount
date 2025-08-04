@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { MoreVertical, PencilIcon, TrashIcon } from 'lucide-react';
-import { toast } from 'sonner';
 import useSWR from 'swr';
 import { User } from '@/lib/db/schema';
 import { useAtom } from 'jotai';
@@ -13,6 +12,8 @@ import { isAddingPromotionAtom, isEditingPromotionAtom } from './atom_state';
 import AddPromotionSection from '../promotionForms/addPromotion';
 import EditPromotion from '../promotionForms/editPromotion';
 import { Promotion } from '../promotionForms/types';
+import AddPromoForm from '../promotionForms/addPromoForm';
+import { toast } from 'react-toastify';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -28,6 +29,7 @@ export default function ProfilePage() {
     title: '',
     description: '',
     price: "0.0",
+    reported: [],
     imageUrl: '',
     category: 'food',
     startDate: new Date().toISOString().split('T')[0],
@@ -38,7 +40,8 @@ export default function ProfilePage() {
     starAverage: 0,
     userId: 1,
     longDescription: "",
-    discount: "0%"
+    discount: "0%",
+    oldPrice: "0.0"
 });
 const {data: user } = useSWR<User>('/api/user', fetcher);
 
@@ -228,9 +231,10 @@ const {data: user } = useSWR<User>('/api/user', fetcher);
                     <p className="text-gray-700">{promotion.description}</p>
                     <div className="mt-4 flex justify-between items-center">
                       <span className="text-lg font-bold">€{promotion.price}</span>
+                      {promotion.endDate && 
                       <span className="text-sm text-gray-500">
                         Ends: {new Date(promotion.endDate).toLocaleDateString()}
-                      </span>
+                      </span>}
                     </div>
                   </CardContent>
                   {/* TODO:  Make sure this link works*/}
@@ -258,7 +262,7 @@ const {data: user } = useSWR<User>('/api/user', fetcher);
         Coming soon...
         {/* Below is the adding promotion overlay */}
         <div>
-          {user && isAddingPromotion && <AddPromotionSection userId={user?.id} onSuccess={fetchPromotions}></AddPromotionSection>} 
+          {user && isAddingPromotion && <AddPromoForm userId={user?.id} onSuccess={fetchPromotions}></AddPromoForm>} 
         </div>
         {/* Below is the editing promotion overlay */}
         <div>

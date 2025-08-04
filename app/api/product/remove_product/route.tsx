@@ -8,7 +8,6 @@ export async function DELETE(
 ) {
   try {
       const { id } = await request.json();
-      console.log("request is: ", request)
     // Validate the ID
     const productId = parseInt(id);
     if (isNaN(productId)) {

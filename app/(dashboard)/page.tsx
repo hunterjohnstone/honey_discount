@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import AddPromotionSection from './promotionForms/addPromotion';
 import { basePromoObject, Promotion } from './promotionForms/types';
+import AddPromoForm from './promotionForms/addPromoForm';
 
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
@@ -45,8 +46,6 @@ const DiscoverPage = () => {
       //get product data from api
       const response = await fetch('/api/product/get_data');
       const data = await response.json();
-
-      console.log("data in frontend is: ", data)
       
       //transform the data
       // const transformedPromotions = data.map((offer : z.infer<typeof ProductSchema>) => transformPromotionObject(offer));
@@ -56,7 +55,6 @@ const DiscoverPage = () => {
       //save it in state
       setPromotions(data);
       setFilteredPromotions(data);
-      console.log("filtered promotions: ",filteredPromotions)
     } catch (error) {
       console.log("you fucked up at fetch offers", error);
       return Error
@@ -153,7 +151,7 @@ const DiscoverPage = () => {
           </div>
         </div>
 
-        {isAddingPromotion && user && <AddPromotionSection userId={user.id} onSuccess={fetchData}></AddPromotionSection>}
+        {isAddingPromotion && user && <AddPromoForm userId={user.id} onSuccess={fetchData}></AddPromoForm>}
 
         {filteredPromotions.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -193,9 +191,12 @@ const DiscoverPage = () => {
                     <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
                       {promotion.location}
                     </span>
-                    <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
-                      {new Date(promotion.endDate).toLocaleDateString()}
-                    </span>
+                    {
+                      promotion.endDate &&
+                      <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
+                        {new Date(promotion.endDate).toLocaleDateString()}
+                      </span>
+                    }
                   </div>
                 </div>
               </Link>
