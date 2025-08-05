@@ -1,20 +1,18 @@
 "use client";
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
-import z from 'zod';
 import Error from 'next/error';
 import useSWR from 'swr';
 import { User } from '@/lib/db/schema';
 import Link from 'next/link';
 import { useAtom, useSetAtom } from 'jotai';
 import { isAddingPromotionAtom, promotionsAtomState } from './profile/atom_state';
-import { ProductSchema, transformPromotionObject } from './transform';
 import { RatingDisplay } from './startDisplay';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import AddPromotionSection from './promotionForms/addPromotion';
-import { basePromoObject, Promotion } from './promotionForms/types';
+import { Promotion } from './promotionForms/types';
 import AddPromoForm from './promotionForms/addPromoForm';
+import { Pagination } from '@/components/ui/pagination';
 
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
@@ -24,22 +22,25 @@ const DiscoverPage = () => {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [filteredPromotions, setFilteredPromotions] = useState<Promotion[]>([]);
   const [isAddingPromotion, setIsAddingPromotion] = useAtom(isAddingPromotionAtom);
-  // const [newPromotion, setNewPromotion] = useState<Omit<Promotion, 'id' | 'isActive' | 'userId'>>(basePromoObject);
+  const [isLoading, setLoading ] = useState(true);
+
+  //Pagination
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const totalPages = 10 // Replace with your actual total pages
   
   const setNewPromotionsAtom = useSetAtom(promotionsAtomState)
 
   //Allow calls to API and use user body
   const {data: user } = useSWR<User>('/api/user', fetcher)
 
-  // Filters
+  //Filters
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200]);
   const [locationFilter, setLocationFilter] = useState<string>('all');
 
   useEffect(() => {
-    // Retrieve data from the DB via API call
     fetchData();
-  }, [router]);
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -47,17 +48,14 @@ const DiscoverPage = () => {
       const response = await fetch('/api/product/get_data');
       const data = await response.json();
       
-      //transform the data
-      // const transformedPromotions = data.map((offer : z.infer<typeof ProductSchema>) => transformPromotionObject(offer));
-
-      setNewPromotionsAtom(data)
-
-      //save it in state
+      setNewPromotionsAtom(data);
       setPromotions(data);
       setFilteredPromotions(data);
     } catch (error) {
       console.log("you fucked up at fetch offers", error);
       return Error
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -75,7 +73,6 @@ const DiscoverPage = () => {
     
     setFilteredPromotions(results);
   }, [categoryFilter, locationFilter, priceRange, promotions]);
-
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -98,45 +95,91 @@ const DiscoverPage = () => {
         </div>
 
         {/* Filters */}
-        <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">Filters</h2>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <h2 className="text-xl font-semibold text-gray-800">Filters</h2>
+            <button
+              onClick={() => {
+                setCategoryFilter('all');
+                setLocationFilter('all');
+                setPriceRange([0, 200]);
+              }}
+              className="cursor-pointer text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              Clear all filters
+            </button>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Category Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-              >
-                <option value="all">All Categories</option>
-                <option value="food">Food & Dining</option>
-                <option value="fitness">Fitness</option>
-                <option value="electronics">Electronics</option>
-                <option value="retail">Retail</option>
-                <option value="services">Services</option>
-              </select>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+              <div className="relative">
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-lg transition-all appearance-none bg-white"
+                >
+                  <option value="all">All Categories</option>
+                  <option value="food">Food & Dining</option>
+                  <option value="fitness">Fitness</option>
+                  <option value="electronics">Electronics</option>
+                  <option value="retail">Retail</option>
+                  <option value="services">Services</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                  <svg 
+                    className="h-5 w-5 text-gray-400" 
+                    viewBox="0 0 20 20" 
+                    fill="currentColor"
+                  >
+                    <path 
+                      fillRule="evenodd" 
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" 
+                      clipRule="evenodd" 
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
             
+            {/* Location Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-              <select
-                value={locationFilter}
-                onChange={(e) => setLocationFilter(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-              >
-                <option value="all">All Locations</option>
-                <option value="granada">Granada</option>
-                <option value="sevilla">Sevilla</option>
-                <option value="madrid">Madrid</option>
-                <option value="suburbs">Suburbs</option>
-              </select>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+              <div className="relative">
+                <select
+                  value={locationFilter}
+                  onChange={(e) => setLocationFilter(e.target.value)}
+                  className={`block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-lg transition-all appearance-none bg-white bg-[url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")] bg-no-repeat bg-[right_0.75rem_center] bg-[length:1.25rem_1.25rem]`}
+                >
+                  <option value="all">All Locations</option>
+                  <option value="granada">Granada</option>
+                  <option value="sevilla">Sevilla</option>
+                  <option value="madrid">Madrid</option>
+                  <option value="suburbs">Suburbs</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                  <svg 
+                    className="h-5 w-5 text-gray-400" 
+                    viewBox="0 0 20 20" 
+                    fill="currentColor"
+                  >
+                    <path 
+                      fillRule="evenodd" 
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" 
+                      clipRule="evenodd" 
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
             
+            {/* Price Range Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price Range: €{priceRange[0]} - €{priceRange[1]}
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Price Range: <span className="font-semibold">€{priceRange[0]} - €{priceRange[1]}</span>
               </label>
-              <div className="flex items-center space-x-4">
+              <div className="space-y-2">
                 <input
                   type="range"
                   min="0"
@@ -144,23 +187,33 @@ const DiscoverPage = () => {
                   step="5"
                   value={priceRange[1]}
                   onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                  className="w-full cursor-pointer"
+                  className="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-600"
                 />
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>€0</span>
+                  <span>€200</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-
         {isAddingPromotion && user && <AddPromoForm userId={user.id} onSuccess={fetchData}></AddPromoForm>}
 
-        {filteredPromotions.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPromotions.map((promotion) => (
-              <Link 
-                key={promotion.id}
-                href={{pathname: `/${promotion.id}`}}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow block"
-              >
+        {/* TODO: Move this section to a seperate component (also put spinner in the center)  */}
+        {isLoading ? (
+          <div className="flex justify-center items-center h-screen">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : (
+          <div>
+          {filteredPromotions.length > 0 ? (
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6 w-full">
+          {filteredPromotions.map((promotion) => (
+          <div key={promotion.id} className="break-inside-avoid">
+            <Link 
+              href={{pathname: `/${promotion.id}`}}
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow block h-full"
+            >
               <div className="h-48 overflow-hidden relative">
                 <div className="absolute top-2 right-2 bg-red-600 text-white text-sm font-bold px-2.5 py-1 rounded-full z-10 shadow-md transform rotate-6 hover:rotate-0 transition-transform">
                   {`${promotion.discount} OFF`}
@@ -174,9 +227,14 @@ const DiscoverPage = () => {
                 <div className="p-4">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-xl font-semibold text-gray-800">{promotion.title}</h3>
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">
-                      €{promotion.price}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-700 line-through text-md">
+                        €{promotion.oldPrice}
+                      </span>
+                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded-lg font-medium text-sm">
+                        €{promotion.price}
+                      </span>
+                    </div>
                   </div>
                   <RatingDisplay 
                     averageRating={promotion.starAverage} 
@@ -200,6 +258,7 @@ const DiscoverPage = () => {
                   </div>
                 </div>
               </Link>
+              </div>
             ))}
           </div>
         ) : (
@@ -217,7 +276,15 @@ const DiscoverPage = () => {
             </button>
           </div>
         )}
+        </div>
+        )}
       </main>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        className="my-4"
+      />
     </div>
   );
 };

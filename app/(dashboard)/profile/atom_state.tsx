@@ -17,6 +17,7 @@ export const promotionsAtomState = atom<Promotion[]>([
         numReviews: 0,
         starAverage: 0,
         userId: 1,
+        reported: [],
         longDescription: "",
         discount: "0%",
     }
@@ -36,6 +37,7 @@ export const editPromotionState = atom<Promotion>({
   location: 'granada',
   isActive: true,
   numReviews: 0,
+  reported: [],
   starAverage: 0.0,
   userId: 1,
   longDescription: "",

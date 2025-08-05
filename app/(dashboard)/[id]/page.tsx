@@ -67,92 +67,97 @@ export default function PromotionPage() {
   <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
     <div className="h-64 overflow-hidden relative">
 
-    <div className="absolute top-4 right-4 bg-gradient-to-r from-red-600 to-red-500 text-white font-bold px-3 py-2 rounded-md shadow-lg z-10 transform rotate-3 hover:rotate-0 transition-transform">
-      <div className="flex items-center gap-1">
-        <span className="text-sm">SAVE</span>
-        <span className="text-lg">{promotion.discount}</span>
+      <div className="absolute top-4 right-4 bg-gradient-to-r from-red-600 to-red-500 text-white font-bold px-3 py-2 rounded-md shadow-lg z-10 transform rotate-3 hover:rotate-0 transition-transform">
+        <div className="flex items-center gap-1">
+          <span className="text-sm">SAVE</span>
+          <span className="text-lg">{promotion.discount}</span>
+        </div>
+        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-700 rotate-45 transform -z-10"></div>
       </div>
-      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-700 rotate-45 transform -z-10"></div>
+      <img
+        src={promotion.imageUrl}
+        alt={promotion.title}
+        className="w-full h-full object-cover"
+      />
     </div>
-    <img
-      src={promotion.imageUrl}
-      alt={promotion.title}
-      className="w-full h-full object-cover"
-    />
-  </div>
-            
-  <div className="p-4 sm:p-6">
-    {/* Header section - stacked on mobile */}
-    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
-      <div className="flex flex-col">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2 sm:mb-0 sm:pr-5">
-          {promotion.title}
-        </h1>
-        <div className='mt-2'>
-        <RatingDisplay
-          averageRating={promotion.starAverage} 
-          reviewCount={promotion.numReviews} 
-          size={window.innerWidth < 640 ? "sm" : "md"} 
-        />
+              
+    <div className="p-4 sm:p-6">
+      {/* Header section - stacked on mobile */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+        <div className="flex flex-col">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2 sm:mb-0 sm:pr-5">
+            {promotion.title}
+          </h1>
+          <div className='mt-2'>
+          <RatingDisplay
+            averageRating={promotion.starAverage} 
+            reviewCount={promotion.numReviews} 
+            size={window.innerWidth < 640 ? "sm" : "md"} 
+          />
+          </div>
+        </div>
+        
+        {/* Right-aligned elements - stays right but stacks internally on mobile */}
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-gray-700 line-through text-lg">
+              €{promotion.oldPrice}
+            </span>
+            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-base sm:text-lg font-medium">
+              €{promotion.price}
+            </span>
+          </div>
+
+          <button 
+            className="text-xs sm:text-sm text-gray-500 cursor-pointer hover:text-red-500 flex items-center gap-1 transition-colors"
+            onClick={() => setIsReporting(true)}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            Report Promotion
+          </button>
         </div>
       </div>
-      
-      {/* Right-aligned elements - stays right but stacks internally on mobile */}
-      <div className="flex flex-col items-end gap-2">
-        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-base sm:text-lg font-medium">
-          €{promotion.price}
+
+      {/* Description - full width on mobile */}
+      <p className="text-sm sm:text-base text-gray-600 mb-4">
+        {promotion.description}
+      </p>
+
+      {/* Tags - wrap properly on mobile */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs sm:text-sm">
+          {promotion.category}
         </span>
-        <button 
-          className="text-xs sm:text-sm text-gray-500 cursor-pointer hover:text-red-500 flex items-center gap-1 transition-colors"
-          onClick={() => setIsReporting(true)}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          Report Promotion
-        </button>
+        <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs sm:text-sm">
+          {promotion.location}
+        </span>
+        {promotion.endDate &&         
+        <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs sm:text-sm">
+          Ends: {new Date(promotion.endDate).toLocaleDateString()}
+        </span>}
       </div>
-    </div>
-
-    {/* Description - full width on mobile */}
-    <p className="text-sm sm:text-base text-gray-600 mb-4">
-      {promotion.description}
-    </p>
-
-    {/* Tags - wrap properly on mobile */}
-    <div className="flex flex-wrap gap-2 mb-6">
-      <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs sm:text-sm">
-        {promotion.category}
-      </span>
-      <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs sm:text-sm">
-        {promotion.location}
-      </span>
-      {promotion.endDate &&         
-      <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs sm:text-sm">
-        Ends: {new Date(promotion.endDate).toLocaleDateString()}
-      </span>}
-    </div>
-    
-    {/* Long Description Section */}
-    <div className="mt-6 sm:mt-8 border-t border-gray-200 pt-4 sm:pt-6">
-      <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">
-        Description
-      </h2>
-      <div className="prose max-w-none text-gray-600">
-        {promotion.longDescription ? (
-          <p className="text-sm sm:text-base whitespace-pre-line leading-relaxed">
-            {promotion.longDescription}
-          </p>
-        ) : (
-          <p className="text-xs sm:text-sm text-gray-400 italic">
-            No additional details provided
-          </p>
-        )}
+      
+      {/* Long Description Section */}
+      <div className="mt-6 sm:mt-8 border-t border-gray-200 pt-4 sm:pt-6">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">
+          Description
+        </h2>
+        <div className="prose max-w-none text-gray-600">
+          {promotion.longDescription ? (
+            <p className="text-sm sm:text-base whitespace-pre-line leading-relaxed">
+              {promotion.longDescription}
+            </p>
+          ) : (
+            <p className="text-xs sm:text-sm text-gray-400 italic">
+              No additional details provided
+            </p>
+          )}
+        </div>
       </div>
     </div>
   </div>
-</div>
-  
   <ReviewForm productId={parseInt(promotion.id)}></ReviewForm>
   <ReportForm productId={parseInt(promotion.id)} ></ReportForm>
 </div>

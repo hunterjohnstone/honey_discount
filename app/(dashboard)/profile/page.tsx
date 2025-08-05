@@ -9,7 +9,6 @@ import useSWR from 'swr';
 import { User } from '@/lib/db/schema';
 import { useAtom } from 'jotai';
 import { isAddingPromotionAtom, isEditingPromotionAtom } from './atom_state';
-import AddPromotionSection from '../promotionForms/addPromotion';
 import EditPromotion from '../promotionForms/editPromotion';
 import { Promotion } from '../promotionForms/types';
 import AddPromoForm from '../promotionForms/addPromoForm';

@@ -11,6 +11,7 @@ import { NextResponse } from 'next/server';
         title: data.title,
         description: data.description,
         price: data.price,
+        oldPrice: data.oldPrice,
         imageUrl: data.imageUrl,
         category: data.category,
         startDate: data.startDate,

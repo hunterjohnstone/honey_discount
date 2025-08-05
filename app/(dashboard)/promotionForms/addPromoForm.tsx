@@ -5,6 +5,7 @@ import { isAddingPromotionAtom } from "../profile/atom_state";
 import { basePromoObject, Promotion } from "./types";
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { toast } from 'react-toastify';
 
 const safeDateDisplay = (dateString: string | undefined, fallback = '') => {
   if (!dateString) return fallback;
@@ -64,7 +65,7 @@ export default function AddPromoForm({ userId, onSuccess }: {
       ...basePromoObject,
       price: '',
       oldPrice: '',
-      imageUrl: "https://t3.ftcdn.net/jpg/11/86/32/62/360_F_1186326217_w0LDFI0Mv6G8gJnSBypbcVWvX1KWyDh0.jpg"
+      imageUrl: ""
     }
   });
 
@@ -85,7 +86,7 @@ export default function AddPromoForm({ userId, onSuccess }: {
       
       // Validate that discounted price is lower than original
       if (priceValue >= oldPriceValue) {
-        alert('Discounted price must be lower than original price');
+        toast.error('Discounted price must be lower than original price');
         return;
       }
       const discount = Math.round((1 - parseFloat(watch('price')) / parseFloat(watch('oldPrice'))) * 100).toString();      
@@ -95,7 +96,7 @@ export default function AddPromoForm({ userId, onSuccess }: {
         description: data.description,
         longDescription: data.longDescription,
         price: data.price,
-        oldPrice:data.oldPrice,
+        oldPrice: data.oldPrice,
         discount: discount + "%",
         category: data.category,
         startDate: data.startDate,
@@ -126,11 +127,11 @@ export default function AddPromoForm({ userId, onSuccess }: {
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl border border-gray-100 flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
+        <div className="flex justify-between items-center p-6 border-b border-gray-200 sticky top-0 z-10">
           <h2 className="text-2xl font-bold text-gray-800">Create New Promotion</h2>
           <button
             onClick={() => setIsAddingPromotion(false)}
-            className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1"
+            className="cursor-pointer text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1"
             aria-label="Close"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -346,18 +347,18 @@ export default function AddPromoForm({ userId, onSuccess }: {
           </div>
 
           {/* Footer */}
-          <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
+          <div className="sticky bottom-0 border-t bg-white rounded-b-xl border-gray-200 p-4">
             <div className="flex justify-end space-x-3">
               <button
                 type="button"
                 onClick={() => setIsAddingPromotion(false)}
-                className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 cursor-pointer hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                className="px-5 py-2.5 bg-black text-white rounded-lg transition-colors cursor-pointer hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
