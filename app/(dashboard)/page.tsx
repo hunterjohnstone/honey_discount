@@ -13,23 +13,25 @@ import { Button } from '@/components/ui/button';
 import { Promotion } from './promotionForms/types';
 import AddPromoForm from './promotionForms/addPromoForm';
 import { Pagination } from '@/components/ui/pagination';
+import { usePromotions } from './hooks/usePromo';
 
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 const DiscoverPage = () => {
   const router = useRouter();
-  const [promotions, setPromotions] = useState<Promotion[]>([]);
+
+  const {
+    data: promotions,
+    loading,
+    error,
+    pagination,
+    fetchData,
+  } = usePromotions()
+
   const [filteredPromotions, setFilteredPromotions] = useState<Promotion[]>([]);
   const [isAddingPromotion, setIsAddingPromotion] = useAtom(isAddingPromotionAtom);
-  const [isLoading, setLoading ] = useState(true);
-
-  //Pagination
-  const [currentPage, setCurrentPage] = useState<number>(1)
-  const totalPages = 10 // Replace with your actual total pages
   
-  const setNewPromotionsAtom = useSetAtom(promotionsAtomState)
-
   //Allow calls to API and use user body
   const {data: user } = useSWR<User>('/api/user', fetcher)
 
@@ -40,24 +42,13 @@ const DiscoverPage = () => {
 
   useEffect(() => {
     fetchData();
+    setFilteredPromotions(promotions)
   }, []);
 
-  const fetchData = async () => {
-    try {
-      //get product data from api
-      const response = await fetch('/api/product/get_data');
-      const data = await response.json();
-      
-      setNewPromotionsAtom(data);
-      setPromotions(data);
-      setFilteredPromotions(data);
-    } catch (error) {
-      console.log("you fucked up at fetch offers", error);
-      return Error
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handlePageChange = (page: number) => {
+    fetchData(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   useEffect(() => {
     // Apply filters
@@ -200,20 +191,20 @@ const DiscoverPage = () => {
         {isAddingPromotion && user && <AddPromoForm userId={user.id} onSuccess={fetchData}></AddPromoForm>}
 
         {/* TODO: Move this section to a seperate component (also put spinner in the center)  */}
-        {isLoading ? (
+        {loading ? (
           <div className="flex justify-center items-center h-screen">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : (
           <div>
           {filteredPromotions.length > 0 ? (
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6 w-full">
-          {filteredPromotions.map((promotion) => (
-          <div key={promotion.id} className="break-inside-avoid">
-            <Link 
-              href={{pathname: `/${promotion.id}`}}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow block h-full"
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPromotions.map((promotion) => (
+              <div key={promotion.id} className="w-full">
+                <Link 
+                  href={{pathname: `/${promotion.id}`}}
+                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow block h-full"
+              >
               <div className="h-48 overflow-hidden relative">
                 <div className="absolute top-2 right-2 bg-red-600 text-white text-sm font-bold px-2.5 py-1 rounded-full z-10 shadow-md transform rotate-6 hover:rotate-0 transition-transform">
                   {`${promotion.discount} OFF`}
@@ -280,10 +271,10 @@ const DiscoverPage = () => {
         )}
       </main>
       <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-        className="my-4"
+        currentPage={pagination.currentPage}
+        totalPages={pagination.totalPages}
+        onPageChange={handlePageChange}
+        className="my-8 justify-center"
       />
     </div>
   );
