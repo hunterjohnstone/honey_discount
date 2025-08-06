@@ -8,10 +8,10 @@ import {
   boolean,
   index,
   uniqueIndex,
-  numeric
+  numeric,
+  point
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { ReportedObject } from '@/app/api/product/report/route';
 
 
 export const products = pgTable('products', {
@@ -23,6 +23,7 @@ export const products = pgTable('products', {
   discount: varchar('discount'),
   longDescription: varchar('long_description'),
   imageUrl: varchar('image_url', {length: 200}),
+  mapLocation: point("map_location"),
   category: varchar('category', {length: 100}),
   startDate: varchar('start_date', {length: 100}),
   endDate: varchar('end_date', {length: 100}),

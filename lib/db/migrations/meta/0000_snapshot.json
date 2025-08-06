@@ -1,5 +1,5 @@
 {
-  "id": "a064376c-65f1-4234-9779-e7a4f50260e1",
+  "id": "7b58c6fd-330f-42c5-b8f3-597d01add530",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -285,6 +285,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "map_location": {
+          "name": "map_location",
+          "type": "point",
+          "primaryKey": false,
+          "notNull": false
+        },
         "category": {
           "name": "category",
           "type": "varchar(100)",
@@ -314,6 +320,13 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": false
+        },
+        "reported": {
+          "name": "reported",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'"
         },
         "user_id": {
           "name": "user_id",

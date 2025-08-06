@@ -86,7 +86,7 @@ export default function EditPromotion({ promotionToEdit, onSuccess } : {
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl border border-gray-100">
                 <div className="flex justify-between items-start mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Create New Promotion</h2>
+                <h2 className="text-2xl font-bold text-gray-800">Edit Promotion</h2>
                 <button
                     onClick={() => setIsEditingPromotion(false)}
                     className="cursor-pointer text-gray-400 hover:text-gray-500"
@@ -164,7 +164,7 @@ export default function EditPromotion({ promotionToEdit, onSuccess } : {
                         {error && (<p className="mt-1 text-sm text-red-600">{error}</p>)}
                     </div>
                     
-                    <div>
+                    {/* <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
                     <select
                         name="location"
@@ -177,7 +177,7 @@ export default function EditPromotion({ promotionToEdit, onSuccess } : {
                         <option value="madrid">Madrid</option>
                         <option value="suburbs">Suburbs</option>
                     </select>
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -229,7 +229,7 @@ export default function EditPromotion({ promotionToEdit, onSuccess } : {
                 </button>
                 <button
                     onClick={() => handleEditPromotion()}
-                    className="cursor-pointer px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    className="cursor-pointer text-white bg-black hover:bg-gray-800 px-5 py-2.5 rounded-lg transition-colors focus:ring-2 focus:ring-offset-2"
                 >
                     Edit Promotion
                 </button>

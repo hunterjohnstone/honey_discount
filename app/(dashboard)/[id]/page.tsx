@@ -4,10 +4,10 @@ import { useParams, useRouter } from 'next/navigation';
 import { RatingDisplay } from '../startDisplay';
 import { ReviewForm } from '../profile/review-form';
 import { Promotion } from '../promotionForms/types';
-import { ReportRequestType } from '@/app/api/product/report/route';
 import ReportForm from '../promotionForms/reportForm';
-import { useAtom, useSetAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import { isReportingAtom } from '../profile/atom_state';
+import MapWrapper from '@/components/mapWrapper';
 
 export default function PromotionPage() {
   const router = useRouter();
@@ -125,14 +125,13 @@ export default function PromotionPage() {
         {promotion.description}
       </p>
 
-      {/* Tags - wrap properly on mobile */}
       <div className="flex flex-wrap gap-2 mb-6">
         <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs sm:text-sm">
           {promotion.category}
         </span>
-        <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs sm:text-sm">
+        {/* <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs sm:text-sm">
           {promotion.location}
-        </span>
+        </span> */}
         {promotion.endDate &&         
         <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs sm:text-sm">
           Ends: {new Date(promotion.endDate).toLocaleDateString()}
@@ -157,6 +156,8 @@ export default function PromotionPage() {
         </div>
       </div>
     </div>
+
+    {promotion.mapLocation !== null && <MapWrapper promotions={[promotion]}/>}
   </div>
   <ReviewForm productId={parseInt(promotion.id)}></ReviewForm>
   <ReportForm productId={parseInt(promotion.id)} ></ReportForm>

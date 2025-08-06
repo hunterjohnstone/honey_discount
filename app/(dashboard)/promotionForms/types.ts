@@ -16,6 +16,10 @@ export type InputPromotionSchema = {
     userId: number;
   };
 
+  export type GeoJSONPoint = {
+    type: 'Point';
+    coordinates: [number, number]; // [lng, lat] for GeoJSON spec
+  };
   export type Promotion = {
     id: string;
     title: string;
@@ -30,6 +34,7 @@ export type InputPromotionSchema = {
     location: string;
     isActive: boolean;
     starAverage: number;
+    mapLocation: [number, number] | undefined;
     numReviews: number;
     userId: number;
     longDescription: string;
@@ -51,6 +56,7 @@ export type InputPromotionSchema = {
     starAverage: 0,
     numReviews: 0,
     longDescription: "",
+    mapLocation:[0,0],
     isActive: true,
     discount: "0%",
     oldPrice: "",

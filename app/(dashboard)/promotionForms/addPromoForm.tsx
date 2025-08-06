@@ -6,6 +6,9 @@ import { basePromoObject, Promotion } from "./types";
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'react-toastify';
+import { useState } from 'react';
+// import { LocationPicker } from '@/components/locationPicker';
+import LocationFormWrapper from '@/components/locationFormWrapper';
 
 const safeDateDisplay = (dateString: string | undefined, fallback = '') => {
   if (!dateString) return fallback;
@@ -52,6 +55,10 @@ export default function AddPromoForm({ userId, onSuccess }: {
 }) {
   const router = useRouter();
   const setIsAddingPromotion = useSetAtom(isAddingPromotionAtom);
+const [mapLocation, setMapLocation] = useState<{
+  address: string
+  coordinates: [number, number]
+}>()
   const {
     register,
     handleSubmit,
@@ -105,6 +112,7 @@ export default function AddPromoForm({ userId, onSuccess }: {
         imageUrl: data.imageUrl || "https://t3.ftcdn.net/jpg/11/86/32/62/360_F_1186326217_w0LDFI0Mv6G8gJnSBypbcVWvX1KWyDh0.jpg",
         userId,
         isActive: true,
+        mapLocation: mapLocation ? [mapLocation?.coordinates[0], mapLocation?.coordinates[1]] : undefined,
       };
 
       await fetch('/api/product/put_data', {
@@ -245,7 +253,7 @@ export default function AddPromoForm({ userId, onSuccess }: {
 
             {/* Location and Dates */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-1">
+              {/* <div className="space-y-1">
                 <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location*</label>
                 <select
                   id="location"
@@ -259,6 +267,13 @@ export default function AddPromoForm({ userId, onSuccess }: {
                   <option value="suburbs">Suburbs</option>
                 </select>
                 {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>}
+              </div> */}
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-gray-700">Map Location</label>
+                <LocationFormWrapper 
+                  value={mapLocation}
+                  onChange={setMapLocation}
+                />
               </div>
             </div>
 

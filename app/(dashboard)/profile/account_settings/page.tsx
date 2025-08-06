@@ -197,12 +197,12 @@ function ManageSubscription() {
         </CardContent>
       </Card>
 
-      <h1 className="text-lg lg:text-2xl font-medium text-gray-900 mb-6">
+      {/* <h1 className="text-lg lg:text-2xl font-medium text-gray-900 mb-6">
           Plan
       </h1>
       <Suspense fallback={<SubscriptionSkeleton />}>
         <ManageSubscription />
-      </Suspense>
+      </Suspense> */}
       <h1 className="text-lg lg:text-2xl font-medium bold text-gray-900 mb-6">
         Security Settings
       </h1>

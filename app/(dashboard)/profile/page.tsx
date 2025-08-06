@@ -31,6 +31,7 @@ export default function ProfilePage() {
     reported: [],
     imageUrl: '',
     category: 'food',
+    mapLocation: [0,0],
     startDate: new Date().toISOString().split('T')[0],
     endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     location: 'granada',
@@ -219,7 +220,7 @@ const {data: user } = useSWR<User>('/api/user', fetcher);
                       </DropdownMenu>
                     </div>
                     <CardTitle>{promotion.title}</CardTitle>
-                    <CardDescription>{promotion.category} • {promotion.location}</CardDescription>
+                    <CardDescription>{promotion.category}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <img

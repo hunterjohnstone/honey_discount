@@ -26,11 +26,13 @@ CREATE TABLE "products" (
 	"discount" varchar,
 	"long_description" varchar,
 	"image_url" varchar(200),
+	"map_location" "point",
 	"category" varchar(100),
 	"start_date" varchar(100),
 	"end_date" varchar(100),
 	"location" varchar(100),
 	"is_active" boolean,
+	"reported" varchar DEFAULT '[]',
 	"user_id" integer NOT NULL,
 	"starAverage" numeric(2, 1) DEFAULT '0.0' NOT NULL,
 	"num_reviews" integer DEFAULT 0 NOT NULL,
@@ -83,11 +85,3 @@ CREATE INDEX "review_product_idx" ON "product_reviews" USING btree ("product_id"
 CREATE INDEX "review_user_idx" ON "product_reviews" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "review_rating_idx" ON "product_reviews" USING btree ("rating");--> statement-breakpoint
 CREATE UNIQUE INDEX "unique_product_user_review" ON "product_reviews" USING btree ("product_id","user_id");
-
-ALTER TABLE "products" ADD COLUMN "reported" INT DEFAULT 0;
-
--- Add reported column with default value 0
-ALTER TABLE "products" ADD COLUMN "reported" INTEGER DEFAULT 0;
-
--- Update existing rows to set reported = 0 if they're currently NULL
-UPDATE "products" SET "reported" = 0 WHERE "reported" IS NULL;

@@ -14,7 +14,8 @@ import { Promotion } from './promotionForms/types';
 import AddPromoForm from './promotionForms/addPromoForm';
 import { Pagination } from '@/components/ui/pagination';
 import { usePromotions } from './hooks/usePromo';
-
+import MapWrapper from '@/components/mapWrapper';
+import { MapPinIcon, XIcon } from 'lucide-react';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -31,6 +32,7 @@ const DiscoverPage = () => {
 
   const [filteredPromotions, setFilteredPromotions] = useState<Promotion[]>([]);
   const [isAddingPromotion, setIsAddingPromotion] = useAtom(isAddingPromotionAtom);
+  const [showMapModal, setShowMapModal] = useState(false);
   
   //Allow calls to API and use user body
   const {data: user } = useSWR<User>('/api/user', fetcher)
@@ -73,17 +75,24 @@ const DiscoverPage = () => {
       </Head>
 
       <main className="container mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Discover Promotions</h1>
-              <Button
-              onClick={() => (
-                !user ?  router.push('/sign-up') :
-                setIsAddingPromotion(true))}
-              className="cursor-pointer"
-            >
-              Add New Promotion
-            </Button>
+        <div className="flex justify-between items-center mb-6">
+          <Button
+            onClick={() => setShowMapModal(true)}
+            className="cursor-pointer flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors"
+          >
+            <MapPinIcon className="w-5 h-5" />
+            Map
+          </Button>
+            <Button
+            onClick={() => (
+              !user ?  router.push('/sign-up') :
+              setIsAddingPromotion(true))}
+            className="cursor-pointer"
+          >
+            Add New Promotion
+          </Button>
         </div>
+        
 
         {/* Filters */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
@@ -95,13 +104,13 @@ const DiscoverPage = () => {
                 setLocationFilter('all');
                 setPriceRange([0, 200]);
               }}
-              className="cursor-pointer text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+              className="cursor-pointer text-sm font-medium text-gray-600 hover:text-black transition-colors"
             >
               Clear all filters
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Category Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
@@ -135,7 +144,7 @@ const DiscoverPage = () => {
             </div>
             
             {/* Location Filter */}
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
               <div className="relative">
                 <select
@@ -163,7 +172,7 @@ const DiscoverPage = () => {
                   </svg>
                 </div>
               </div>
-            </div>
+            </div> */}
             
             {/* Price Range Filter */}
             <div>
@@ -189,6 +198,40 @@ const DiscoverPage = () => {
           </div>
         </div>
         {isAddingPromotion && user && <AddPromoForm userId={user.id} onSuccess={fetchData}></AddPromoForm>}
+
+        {/* MAPP */}
+        {showMapModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div 
+              className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+              onClick={() => setShowMapModal(false)}
+            />            
+            <div className="relative z-10 w-full max-w-6xl bg-white rounded-xl shadow-xl overflow-hidden">
+              <div className="flex justify-between items-center p-2 border-b">
+                <button 
+                  onClick={() => setShowMapModal(false)}
+                  className="cursor-pointer p-2 text-gray-500 hover:text-gray-700"
+                >
+                  <XIcon className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <div className="h-[70vh]">
+                <MapWrapper promotions={filteredPromotions} />
+              </div>
+              
+              <div className="p-4 border-t flex justify-end">
+                <button
+                  onClick={() => setShowMapModal(false)}
+                  className="cursor-pointer px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
 
         {/* TODO: Move this section to a seperate component (also put spinner in the center)  */}
         {loading ? (
@@ -237,9 +280,9 @@ const DiscoverPage = () => {
                     <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
                       {promotion.category}
                     </span>
-                    <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
+                    {/* <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
                       {promotion.location}
-                    </span>
+                    </span> */}
                     {
                       promotion.endDate &&
                       <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">

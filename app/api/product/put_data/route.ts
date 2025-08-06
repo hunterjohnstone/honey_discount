@@ -7,11 +7,14 @@ import { NextResponse } from 'next/server';
   export async function POST(request: Request) {
     try {
       const data = await request.json() as Promotion;
+
+      console.log(data.mapLocation);
       await db.insert(products).values({
         title: data.title,
         description: data.description,
         price: data.price,
         oldPrice: data.oldPrice,
+        mapLocation: data.mapLocation,
         imageUrl: data.imageUrl,
         category: data.category,
         startDate: data.startDate,

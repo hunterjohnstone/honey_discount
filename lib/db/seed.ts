@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import { stripe } from '../payments/stripe';
 import { db } from './drizzle';
 import { users, teams, teamMembers, products } from './schema';
@@ -39,6 +40,24 @@ async function createStripeProducts() {
   console.log('Stripe products and prices created successfully.');
 }
 
+const granadaLocations = [
+  { name: "Alhambra", lng: -3.588371, lat: 37.176084 },
+  { name: "Cathedral", lng: -3.599711, lat: 37.176487 },
+  { name: "Albaicín", lng: -3.592627, lat: 37.180961 }
+];
+
+function toMapLocation(lng: number, lat: number) {
+  return {
+    type: "Point",
+    coordinates: [lng, lat]
+  };
+}
+
+// Convert coordinates to PostgreSQL point format
+function toPoint(lng: number, lat: number) {
+  return sql`point(${lng}, ${lat})`;
+}
+
 async function createOffers() {
   console.log('seeding some offers to db...');
 
@@ -46,12 +65,14 @@ async function createOffers() {
     {
       title: 'Weekend Brunch Special',
       description: '20% off all brunch stuff',
-      price: "20",
+      price: "8",
       imageUrl: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
       category: 'food',
       startDate: '2023-06-01',
       endDate: '2023-06-30',
+      oldPrice: '10',
       location: 'granada',
+      mapLocation: toPoint(-3.588, 37.176),
       isActive: true,
       userId: 1,
       longDescription: "The first light of dawn spills over the horizon, painting the sky in soft hues of pink and gold, as the farmer’s market begins to stir to life. The air is crisp and carries the earthy scent of dew-kissed vegetables, freshly baked bread, and bundles of herbs still damp from the morning harvest. Wooden stalls, weathered by seasons of use, are arranged in neat rows, their canopies fluttering slightly in the gentle breeze. Vendors, their hands calloused from years of labor, meticulously arrange their produce—plump tomatoes gleaming like rubies, leafy greens stacked in vibrant pyramids, and baskets of berries so ripe they seem to glow under the rising sun.",
@@ -63,8 +84,10 @@ async function createOffers() {
       price: "45",
       imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
       category: 'fitness',
+      oldPrice: '55',
       startDate: '2023-06-15',
       endDate: '2023-08-31',
+      mapLocation: toPoint(-3.588371, 37.176084),
       location: 'sevilla',
       isActive: true,
       userId: 1,
@@ -74,10 +97,12 @@ async function createOffers() {
     {
       title: 'Tech Gadgets Sale',
       description: '30% off electronics.',
-      price: "199",
+      price: "100",
+      oldPrice: "133",
       imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
       category: 'electronics',
       startDate: '2023-06-10',
+      mapLocation: toPoint(-3.591543,	37.182452),
       endDate: '2023-06-20',
       location: 'madrid',
       isActive: true,

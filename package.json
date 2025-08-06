@@ -27,6 +27,8 @@
     "drizzle-orm": "^0.43.1",
     "jose": "^6.0.11",
     "jotai": "^2.12.5",
+    "leaflet": "^1.9.4",
+    "leaflet-geosearch": "^4.2.0",
     "lucide-react": "^0.511.0",
     "next": "15.4.0-canary.47",
     "postcss": "^8.5.3",
@@ -36,6 +38,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.61.1",
+    "react-leaflet": "^5.0.0",
     "react-toastify": "^11.0.5",
     "server-only": "^0.0.1",
     "stripe": "^18.1.0",
@@ -48,6 +51,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@types/leaflet": "^1.9.20",
     "prettier": "^3.6.2"
   }
 }
