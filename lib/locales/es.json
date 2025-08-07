@@ -1,0 +1,19 @@
+{
+    "welcome": "Bienvenido",
+    "dashboard": "Panel de control",
+    "map": "Mapa",
+    "add new promotion": "Agregar Nueva Promoción",
+    "sign up": "Inscribirse",
+    "sign in": "Iniciar Sesión",
+    "create your account": "Crea tu cuenta",
+    "email": "Correo",
+    "password": "Contraseña",
+    "enter your email": "Ingresa tu correo electrónico",
+    "enter your password": "Ingresa tu contraseña",
+    "already have an account?": "¿Ya tienes una cuenta?",
+    "sign in to existing account": "Iniciar sesión en una cuenta existente",
+    "sign in to your account": "Inicia sesión en tu cuenta",
+    "new to our platform?": "¿Eres nuevo en nuestra plataforma?",
+    "create an account": "crea una cuenta",
+    "loading": "Cargando..."
+}

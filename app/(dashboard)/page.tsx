@@ -16,6 +16,7 @@ import { Pagination } from '@/components/ui/pagination';
 import { usePromotions } from './hooks/usePromo';
 import MapWrapper from '@/components/mapWrapper';
 import { MapPinIcon, XIcon } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -41,6 +42,8 @@ const DiscoverPage = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200]);
   const [locationFilter, setLocationFilter] = useState<string>('all');
+
+  const t = useTranslation();
 
   useEffect(() => {
     fetchData();
@@ -73,7 +76,9 @@ const DiscoverPage = () => {
         <title>Discover Promotions</title>
         <meta name="description" content="Find the latest promotions and deals" />
       </Head>
-
+      <div className="p-4 bg-blue-100 dark:bg-blue-900 rounded-lg">
+      <h1 className="text-2xl font-bold">{t('welcome')}</h1>
+    </div>
       <main className="container mx-auto py-8 px-4">
         <div className="flex justify-between items-center mb-6">
           <Button
@@ -81,7 +86,7 @@ const DiscoverPage = () => {
             className="cursor-pointer flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors"
           >
             <MapPinIcon className="w-5 h-5" />
-            Map
+            {t('map')}
           </Button>
             <Button
             onClick={() => (
@@ -89,7 +94,7 @@ const DiscoverPage = () => {
               setIsAddingPromotion(true))}
             className="cursor-pointer"
           >
-            Add New Promotion
+            {t("add new promotion")}
           </Button>
         </div>
         
