@@ -2,6 +2,7 @@ import { db } from "@/lib/db/drizzle";
 import { productReviews, products, User } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import type { NextRequest } from 'next/server'
 
 type RequestType = {
     productId: number;
@@ -10,11 +11,18 @@ type RequestType = {
     userId: number;
 }
 
-//Post rating and comment information for given users in the productReviews table
-//Update the average star rating and the total reviews left
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     try {
-        const data : RequestType = await request.json();
+        const data: RequestType = await request.json();
+        
+        // Validate required fields
+        if (!data.productId || !data.rating || !data.comment || !data.userId) {
+            return NextResponse.json(
+                { error: "Missing required fields" },
+                { status: 400 }
+            );
+        }
+
         await db.insert(productReviews).values({
             productId: data.productId,
             userId: data.userId,
@@ -22,49 +30,44 @@ export async function POST(request: Request) {
             comment: data.comment,
             createdAt: new Date(),
             updatedAt: new Date(),
-        })
+        });
         console.log("Successfully posted to product_reviews table");
 
-        //get product object
+        // Get product object
         const productRow = await db.query.products.findFirst({
             where: eq(products.id, data.productId)
-        })
+        });
 
         if (!productRow) {
-            return Error;
-        } else {
+            return NextResponse.json(
+                { error: "Product not found" },
+                { status: 404 }
+            );
+        }
 
-            const prevTotal = productRow.numReviews;
-            const prevAverage = parseFloat(productRow.starAverage); //can be string JIC
-            const newRating = data.rating;
+        const prevTotal = productRow.numReviews;
+        const prevAverage = parseFloat(productRow.starAverage);
+        const newRating = data.rating;
 
-            // Calculate new average
-            const newAverage = (prevTotal * prevAverage + newRating) / (prevTotal + 1);
+        // Calculate new average
+        const newAverage = (prevTotal * prevAverage + newRating) / (prevTotal + 1);
 
-            console.log("before setting the db update. new average is ", newAverage, " and the new total is is ", (prevTotal + 1));
-
-            await db.update(products)
+        await db.update(products)
             .set({
                 numReviews: prevTotal + 1,
-                starAverage: newAverage.toFixed(1), //1 decimal place 
+                starAverage: newAverage.toFixed(1),
                 updatedAt: new Date()
             })
             .where(eq(products.id, data.productId));
 
-            console.log("after updating db with post request")
-
-            console.log("updated new average column and number of reviews in products table");
-        }
-
-
         return NextResponse.json(
-            { message: "message review created successfully"},
-            { status: 201 }
+            { message: "Review created successfully" },
+            { status: 200 }
         );
     } catch (error) {
-        console.log("error posting at API: ", error);
+        console.error("Error creating product review:", error);
         return NextResponse.json(
-            { error: "Failed to create product review"},
+            { error: "Failed to create product review" },
             { status: 500 }
         );
     }

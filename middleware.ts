@@ -57,5 +57,5 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico|sign-in|sign-up).*)'],
-  runtime: 'edge' // Recommended for middleware
+  runtime: 'experimental-edge'
 };
