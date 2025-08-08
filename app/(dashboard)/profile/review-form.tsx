@@ -93,7 +93,7 @@ export function ReviewForm({ productId }: {
         };
         
         setComments(prev => [...prev, commentObj]);
-        toast.success("Thank you for your review!");
+        toast.success(t('thank you for your comment'));
     
       } catch (error) {
         console.error('Review submission failed:', error);
