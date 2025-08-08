@@ -189,7 +189,14 @@ export async function signOut() {
   const userWithTeam = await getUserWithTeam(user.id);
   await logActivity(userWithTeam?.teamId, user.id, ActivityType.SIGN_OUT);
   (await cookies()).delete('session');
-}
+      (await cookies()).set({
+      name: 'session',
+      value: '',
+      expires: new Date(0),
+      domain: 'discount-project-snowy.vercel.app',
+      path: '/',
+    });
+};
 
 const updatePasswordSchema = z.object({
   currentPassword: z.string().min(8).max(100),
