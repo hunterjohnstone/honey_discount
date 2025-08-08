@@ -34,7 +34,9 @@ export async function verifyToken(input: string) {
   const { payload } = await jwtVerify(input, key, {
     algorithms: ['HS256'],
   });
+  if (!payload) throw new Error('AUTH_SECRET missing');
   return payload as SessionData;
+
 }
 
 export async function getSession() {
@@ -54,9 +56,9 @@ export async function setSession(user: NewUser) {
   (await cookies()).set('session', encryptedSession, {
     expires: expiresInOneDay,
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // Only secure in production
-    sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none', // Adjust for Safari
+    secure: true, // MAKE NODE_ENV PRODUCTION IN PROD
+    sameSite: 'lax', // Adjust for Safari
     path: '/', // Explicit path
-    domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : undefined
+    domain: 'https://discount-project-snowy.vercel.app/'
   });
 }
