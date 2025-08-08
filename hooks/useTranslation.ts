@@ -10,8 +10,6 @@ const translations = {
 };
 
 export function useTranslation() {
-  const { language } = useLanguage();
-  console.log("in this page 'useTranslation' and language is: ", language)
-  
+  const { language } = useLanguage();  
   return (key: keyof typeof enTranslations) => translations[language][key] || key;
 }

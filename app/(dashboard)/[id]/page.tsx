@@ -8,10 +8,12 @@ import ReportForm from '../promotionForms/reportForm';
 import { useSetAtom } from 'jotai';
 import { isReportingAtom } from '../profile/atom_state';
 import MapWrapper from '@/components/mapWrapper';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function PromotionPage() {
   const router = useRouter();
   const id = useParams().id as string
+  const t  = useTranslation();
   
   const [promotion, setPromotion] = useState<Promotion | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,10 +60,10 @@ export default function PromotionPage() {
       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
         <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
       </svg>
-      Back to Promotions
+      {t('back_to_promotions')}
     </button>
     <span className="text-gray-400">|</span>
-    <span className="text-gray-600">Discovery</span>
+    <span className="text-gray-600">{t('discovery')}</span>
   </div>
 
   <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
@@ -69,7 +71,7 @@ export default function PromotionPage() {
 
       <div className="absolute top-4 right-4 bg-gradient-to-r from-red-600 to-red-500 text-white font-bold px-3 py-2 rounded-md shadow-lg z-10 transform rotate-3 hover:rotate-0 transition-transform">
         <div className="flex items-center gap-1">
-          <span className="text-sm">SAVE</span>
+          <span className="text-sm">{t('save')}</span>
           <span className="text-lg">{promotion.discount}</span>
         </div>
         <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-700 rotate-45 transform -z-10"></div>
@@ -120,7 +122,6 @@ export default function PromotionPage() {
         </div>
       </div>
 
-      {/* Description - full width on mobile */}
       <p className="text-sm sm:text-base text-gray-600 mb-4">
         {promotion.description}
       </p>
@@ -129,19 +130,15 @@ export default function PromotionPage() {
         <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs sm:text-sm">
           {promotion.category}
         </span>
-        {/* <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs sm:text-sm">
-          {promotion.location}
-        </span> */}
         {promotion.endDate &&         
         <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs sm:text-sm">
-          Ends: {new Date(promotion.endDate).toLocaleDateString()}
+          {t('ends')}: {new Date(promotion.endDate).toLocaleDateString()}
         </span>}
       </div>
       
-      {/* Long Description Section */}
       <div className="mt-6 sm:mt-8 border-t border-gray-200 pt-4 sm:pt-6">
         <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">
-          Description
+          {t('description')}
         </h2>
         <div className="prose max-w-none text-gray-600">
           {promotion.longDescription ? (
@@ -150,7 +147,7 @@ export default function PromotionPage() {
             </p>
           ) : (
             <p className="text-xs sm:text-sm text-gray-400 italic">
-              No additional details provided
+              {t('no_additional_details')}
             </p>
           )}
         </div>

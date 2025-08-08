@@ -15,6 +15,7 @@ import { signOut } from '@/app/(login)/actions';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/db/schema';
 import useSWR from 'swr';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -22,6 +23,7 @@ function UserMenu() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { data: user } = useSWR<User>('/api/user', fetcher);
   const router = useRouter();
+  const t = useTranslation();
 
   async function handleSignOut() {
     await signOut();
@@ -33,10 +35,10 @@ function UserMenu() {
     return (
       <>
         <Button asChild className="rounded-full cursor-pointer">
-          <Link href="/sign-up">Sign Up</Link>
+          <Link href="/sign-up">{t('sign up')}</Link>
         </Button>
         <Button className="rounded-full bg-white border-4 border-gray-200 hover:bg-gray-200 cursor-pointer text-black">
-          <Link href="/sign-in">Sign In</Link>
+          <Link href="/sign-in">{t('sign in')}</Link>
         </Button>
       </>
     );

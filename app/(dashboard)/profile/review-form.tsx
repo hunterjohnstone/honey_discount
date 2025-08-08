@@ -5,7 +5,7 @@ import useSWR from 'swr';
 import { User } from '@/lib/db/schema';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
-// import { Router } from 'next/router';
+import { useTranslation } from '@/hooks/useTranslation';
 
 type Review = {
     userName: string | null;
@@ -33,7 +33,7 @@ function StarIcon({ className }: { className?: string }) {
 export function ReviewForm({ productId }: { 
     productId: number, 
   }) {
-    // const router = useRouter();
+  const t = useTranslation();
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
     const [comments, setComments] = useState<Review[]>([])
@@ -108,8 +108,7 @@ export function ReviewForm({ productId }: {
     if (!user) {
       return (
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <h2 className="text-2xl font-bold mb-6 text-gray-800">Comments</h2>
-              
+              <h2 className="text-2xl font-bold mb-6 text-gray-800">{t('comments')}</h2>
               <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded">
                   <div className="flex">
                       <div className="flex-shrink-0">
@@ -119,14 +118,14 @@ export function ReviewForm({ productId }: {
                       </div>
                       <div className="ml-3">
                           <p className="text-sm text-blue-700">
-                              To leave a review, please{' '}
+                              {t('sign_in_to_review_message')}
                               <Link href="/sign-in" className="font-medium text-blue-600 hover:text-blue-500 underline">
-                                  sign in
-                              </Link>{' '}
-                              or{' '}
+                                  {t('sign in')}
+                              </Link>
+                              {' '}{t('or')}{' '}
                               <Link href="/sign-up" className="font-medium text-blue-600 hover:text-blue-500 underline">
-                                  create an account
-                              </Link>.
+                                  {t('create an account')}
+                              </Link>
                           </p>
                       </div>
                   </div>
@@ -180,7 +179,7 @@ export function ReviewForm({ productId }: {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                           </svg>
                       </div>
-                      <p className="text-gray-500">No reviews yet</p>
+                      <p className="text-gray-500">{t('be_first_review')}</p>
                   </div>
               )}
           </div>
@@ -189,7 +188,7 @@ export function ReviewForm({ productId }: {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-    <h2 className="text-2xl font-bold mb-6 text-gray-800">Leave a review</h2>
+    <h2 className="text-2xl font-bold mb-6 text-gray-800">{t('leave_review')}</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <div className="flex items-center space-x-1">
@@ -213,7 +212,7 @@ export function ReviewForm({ productId }: {
             rows={4}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             value={comment}
-            placeholder="Share your thoughts!"
+            placeholder={t('share_thoughts')}
             onChange={(e) => setComment(e.target.value)}
             required
           />
@@ -224,8 +223,9 @@ export function ReviewForm({ productId }: {
           disabled={isSubmitting || rating === 0}
           className={`cursor-pointer px-4 py-2 rounded-md text-white font-medium ${isSubmitting || rating === 0 ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
         >
-          {isSubmitting ? 'Submitting...' : 'Submit Review'}
+          {isSubmitting ? t('submitting') : t('submit_review')}
         </button>
+      </form>
       <div className="space-y-6">
     {comments.length > 0 ? (
       comments.map((c) => (
@@ -275,11 +275,10 @@ export function ReviewForm({ productId }: {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
         </div>
-        <p className="text-gray-500">No reviews yet. Be the first to share your thoughts!</p>
+        <p className="text-gray-500">{t('be_first_review')}</p>
       </div>
     )}
   </div>
-      </form>
     </div>
   );
 }

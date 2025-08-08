@@ -5,8 +5,10 @@ import useSWR from "swr";
 import { User } from "@/lib/db/schema";
 import { toast } from "react-toastify";
 import Error from "next/error";
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function ReportForm({ productId }: { productId: number }) {
+  const t = useTranslation();
   const [isReporting, setIsReporting] = useAtom(isReportingAtom);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
@@ -62,8 +64,8 @@ export default function ReportForm({ productId }: { productId: number }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Report Submitted</h3>
-            <p className="text-sm text-gray-500">Thank you for helping improve our community.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('report_submitted')}</h3>
+            <p className="text-sm text-gray-500">{t('thank_you_community')}</p>
             <div className="mt-6">
               <button
                 onClick={() => {
@@ -71,7 +73,7 @@ export default function ReportForm({ productId }: { productId: number }) {
                 }}
                 className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
-                Close
+                {t('close')}
               </button>
             </div>
           </div>
@@ -86,8 +88,8 @@ export default function ReportForm({ productId }: { productId: number }) {
       <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md border border-gray-100">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h2 className="text-xl font-bold text-gray-800">Report Content</h2>
-            <p className="text-sm text-gray-500 mt-1">Help us understand the issue</p>
+            <h2 className="text-xl font-bold text-gray-800">{t('report_content')}</h2>
+            <p className="text-sm text-gray-500 mt-1">{t('help_understand_issue')}</p>
           </div>
           <button
             onClick={() => setIsReporting(false)}
@@ -103,7 +105,7 @@ export default function ReportForm({ productId }: { productId: number }) {
         <form onSubmit={reportPromotion} className="mt-4 space-y-4">
           <div>
             <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-1">
-              Reason for reporting
+              {t('reason_for_reporting')}
             </label>
             <select
               id="reason"
@@ -112,18 +114,18 @@ export default function ReportForm({ productId }: { productId: number }) {
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               required
             >
-              <option value="">Select a reason</option>
-              <option value="Offer no longer valid">Offer no longer valid</option>
-              <option value="Inappropriate content">Inappropriate content</option>
-              <option value="Misleading information">Misleading information</option>
-              <option value="Spam or scam">Spam or scam</option>
-              <option value="Other">Other</option>
+              <option value="">{t('select_reason')}</option>
+              <option value="Offer no longer valid">{t('offer_no_longer_valid')}</option>
+              <option value="Inappropriate content">{t('inappropriate_content')}</option>
+              <option value="Misleading information">{t('misleading_information')}</option>
+              <option value="Spam or scam">{t('spam_or_scam')}</option>
+              <option value="Other">{t('other')}</option>
             </select>
           </div>
 
           <div>
             <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-              Additional details
+              {t('additional_details')}
             </label>
             <textarea
               id="message"
@@ -131,7 +133,7 @@ export default function ReportForm({ productId }: { productId: number }) {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Please provide more information about your report..."
+              placeholder={t('provide_more_info')}
               required
             />
           </div>
@@ -143,7 +145,7 @@ export default function ReportForm({ productId }: { productId: number }) {
               className="cursor-pointer px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               disabled={isSubmitting}
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -156,9 +158,9 @@ export default function ReportForm({ productId }: { productId: number }) {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Submitting...
+                  {t('submitting')}
                 </>
-              ) : 'Submit Report'}
+              ) : t('submit_report')}
             </button>
           </div>
         </form>

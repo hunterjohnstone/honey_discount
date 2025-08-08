@@ -99,7 +99,7 @@ const DiscoverPage = () => {
         {/* Filters */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <h2 className="text-xl font-semibold text-gray-800">Filters</h2>
+            <h2 className="text-xl font-semibold text-gray-800">{t('filters')}</h2>
             <button
               onClick={() => {
                 setCategoryFilter('all');
@@ -108,26 +108,26 @@ const DiscoverPage = () => {
               }}
               className="cursor-pointer text-sm font-medium text-gray-600 hover:text-black transition-colors"
             >
-              Clear all filters
+              {t('clear_all_filters')}
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Category Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('category')}</label>
               <div className="relative">
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
                   className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-lg transition-all appearance-none bg-white"
                 >
-                  <option value="all">All Categories</option>
-                  <option value="food">Food & Dining</option>
-                  <option value="fitness">Fitness</option>
-                  <option value="electronics">Electronics</option>
-                  <option value="retail">Retail</option>
-                  <option value="services">Services</option>
+                  <option value="all">{t('all_categories')}</option>
+                  <option value="food">{t('food_dining')}</option>
+                  <option value="fitness">{t('fitness')}</option>
+                  <option value="electronics">{t('electronics')}</option>
+                  <option value="retail">{t('retail')}</option>
+                  <option value="services">{t('services')}</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                   <svg 
@@ -179,7 +179,7 @@ const DiscoverPage = () => {
             {/* Price Range Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Price Range: <span className="font-semibold">€{priceRange[0]} - €{priceRange[1]}</span>
+                {t('price_range')}: <span className="font-semibold">€{priceRange[0]} - €{priceRange[1]}</span>
               </label>
               <div className="space-y-2">
                 <input
@@ -227,7 +227,7 @@ const DiscoverPage = () => {
                   onClick={() => setShowMapModal(false)}
                   className="cursor-pointer px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 >
-                  Close
+                  {t('close')}
                 </button>
               </div>
             </div>
@@ -252,7 +252,7 @@ const DiscoverPage = () => {
               >
               <div className="h-48 overflow-hidden relative">
                 <div className="absolute top-2 right-2 bg-red-600 text-white text-sm font-bold px-2.5 py-1 rounded-full z-10 shadow-md transform rotate-6 hover:rotate-0 transition-transform">
-                  {`${promotion.discount} OFF`}
+                  {`${promotion.discount} ${t('off')}`}
                 </div>
                 <img
                   src={promotion.imageUrl}
@@ -299,7 +299,7 @@ const DiscoverPage = () => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <h3 className="text-xl font-medium text-gray-600">No promotions found matching your filters</h3>
+            <h3 className="text-xl font-medium text-gray-600">{t('no_promotions_found')}</h3>
             <button
               onClick={() => {
                 setCategoryFilter('all');
@@ -308,7 +308,7 @@ const DiscoverPage = () => {
               }}
               className="mt-4 text-blue-600 hover:text-blue-800 cursor-pointer"
             >
-              Clear all filters
+              {t('clear_all_filters')}
             </button>
           </div>
         )}
