@@ -52,7 +52,7 @@ export async function middleware(request: NextRequest) {
         maxAge: 60 * 60 * 24 * 7,
         expires: expiresInOneDay,
         // Domain should be set in production
-        ...(process.env.NODE_ENV === 'production' && { domain: '.yourdomain.com' })
+        ...(process.env.NODE_ENV === 'production' && { domain: '.discount-project-snowy.vercel.app' })
       });
     } catch (error) {
       console.error('Session verification failed:', error);
