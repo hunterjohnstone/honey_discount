@@ -5,6 +5,20 @@ import { signToken, verifyToken } from '@/lib/auth/session';
 const protectedRoutes = ['/profile']; // Array is easier to maintain
 
 export async function middleware(request: NextRequest) {
+
+  const path = request.nextUrl.pathname;
+  const session = request.cookies.get('session')?.value;
+
+  // Allow auth-related routes
+  if (path.startsWith('/api/auth') || path.startsWith('/auth')) {
+    return NextResponse.next();
+  }
+
+    // Verify session for protected routes
+  if (!session && !path.startsWith('/login')) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
   const { pathname } = request.nextUrl;
   const sessionCookie = request.cookies.get('session');
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
@@ -35,6 +49,7 @@ export async function middleware(request: NextRequest) {
         secure: process.env.NODE_ENV === 'production', // Secure only in production
         sameSite: 'lax', // Change to 'none' if you need cross-site
         path: '/',
+        maxAge: 60 * 60 * 24 * 7,
         expires: expiresInOneDay,
         // Domain should be set in production
         ...(process.env.NODE_ENV === 'production' && { domain: '.yourdomain.com' })

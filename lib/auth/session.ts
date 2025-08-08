@@ -54,11 +54,12 @@ export async function setSession(user: NewUser) {
   const encryptedSession = await signToken(session);
   
   (await cookies()).set('session', encryptedSession, {
-    expires: expiresInOneDay,
     httpOnly: true,
-    secure: true, // MAKE NODE_ENV PRODUCTION IN PROD
+    secure: true,
     sameSite: 'lax', // Adjust for Safari
     path: '/', // Explicit path
+    expires: expiresInOneDay,
+    maxAge: 60 * 60 * 24 * 7, // 1 week expiration
     domain: 'https://discount-project-snowy.vercel.app/'
   });
 }

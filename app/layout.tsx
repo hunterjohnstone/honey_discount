@@ -8,6 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { cookies, headers } from 'next/headers';
 import { LanguageProvider } from '@/context/LanguageContext';
 
+
 export const metadata: Metadata = {
   title: {
     template: '%s | Discount Granada',
