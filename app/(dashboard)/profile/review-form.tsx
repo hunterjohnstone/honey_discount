@@ -34,13 +34,13 @@ export function ReviewForm({ productId }: {
     productId: number, 
   }) {
   const t = useTranslation();
-    const [rating, setRating] = useState(0);
-    const [comment, setComment] = useState('');
-    const [comments, setComments] = useState<Review[]>([])
-    const [isSubmitting, setIsSubmitting] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [comments, setComments] = useState<Review[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-    //fetch user data
-    const { data: user } = useSWR<User>('/api/user', fetcher);
+  //fetch user data
+  const { data: user } = useSWR<User>('/api/user', fetcher);
 
   const fetchData = async () => {
     try {

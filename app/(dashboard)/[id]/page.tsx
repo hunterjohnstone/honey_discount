@@ -9,6 +9,10 @@ import { useSetAtom } from 'jotai';
 import { isReportingAtom } from '../profile/atom_state';
 import MapWrapper from '@/components/mapWrapper';
 import { useTranslation } from '@/hooks/useTranslation';
+import useSWR from 'swr';
+import { User } from '@/lib/db/schema';
+
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function PromotionPage() {
   const router = useRouter();
@@ -19,6 +23,7 @@ export default function PromotionPage() {
   const [loading, setLoading] = useState(true);
   const setIsReporting = useSetAtom(isReportingAtom);
 
+  const { data: user } = useSWR<User>('/api/user', fetcher);
 
   useEffect(() => {
     fetchPromotion();
@@ -109,16 +114,17 @@ export default function PromotionPage() {
               €{promotion.price}
             </span>
           </div>
-
-          <button 
-            className="text-xs sm:text-sm text-gray-500 cursor-pointer hover:text-red-500 flex items-center gap-1 transition-colors"
-            onClick={() => setIsReporting(true)}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            Report Promotion
-          </button>
+          {user && (
+            <button 
+              className="text-xs sm:text-sm text-gray-500 cursor-pointer hover:text-red-500 flex items-center gap-1 transition-colors"
+              onClick={() => setIsReporting(true)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              Report Promotion
+            </button>
+          )}
         </div>
       </div>
 

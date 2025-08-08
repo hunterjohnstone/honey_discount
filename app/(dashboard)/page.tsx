@@ -71,7 +71,7 @@ const DiscoverPage = () => {
   }, [categoryFilter, locationFilter, priceRange, promotions]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 p-3">
       <Head>
         <title>Discover Promotions</title>
         <meta name="description" content="Find the latest promotions and deals" />
@@ -98,7 +98,7 @@ const DiscoverPage = () => {
 
         {/* Filters */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="flex flex-col flex-row items-center justify-between gap-4 mb-6">
             <h2 className="text-xl font-semibold text-gray-800">{t('filters')}</h2>
             <button
               onClick={() => {
@@ -112,8 +112,13 @@ const DiscoverPage = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Category Filter */}
+          <div 
+            className="grid gap-6"
+            style={{
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))'
+            }}
+          >            
+          {/* Category Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">{t('category')}</label>
               <div className="relative">
@@ -144,38 +149,6 @@ const DiscoverPage = () => {
                 </div>
               </div>
             </div>
-            
-            {/* Location Filter */}
-            {/* <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
-              <div className="relative">
-                <select
-                  value={locationFilter}
-                  onChange={(e) => setLocationFilter(e.target.value)}
-                  className={`block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-lg transition-all appearance-none bg-white bg-[url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")] bg-no-repeat bg-[right_0.75rem_center] bg-[length:1.25rem_1.25rem]`}
-                >
-                  <option value="all">All Locations</option>
-                  <option value="granada">Granada</option>
-                  <option value="sevilla">Sevilla</option>
-                  <option value="madrid">Madrid</option>
-                  <option value="suburbs">Suburbs</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                  <svg 
-                    className="h-5 w-5 text-gray-400" 
-                    viewBox="0 0 20 20" 
-                    fill="currentColor"
-                  >
-                    <path 
-                      fillRule="evenodd" 
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" 
-                      clipRule="evenodd" 
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div> */}
-            
             {/* Price Range Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -185,7 +158,7 @@ const DiscoverPage = () => {
                 <input
                   type="range"
                   min="0"
-                  max="200"
+                  max="80"
                   step="5"
                   value={priceRange[1]}
                   onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
@@ -193,7 +166,7 @@ const DiscoverPage = () => {
                 />
                 <div className="flex justify-between text-xs text-gray-500">
                   <span>€0</span>
-                  <span>€200</span>
+                  <span>€80</span>
                 </div>
               </div>
             </div>
@@ -243,8 +216,13 @@ const DiscoverPage = () => {
         ) : (
           <div>
           {filteredPromotions.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPromotions.map((promotion) => (
+            <div 
+                className="grid gap-6"
+                style={{
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))'
+                }}
+              >
+                {filteredPromotions.map((promotion) => (
               <div key={promotion.id} className="w-full">
                 <Link 
                   href={{pathname: `/${promotion.id}`}}

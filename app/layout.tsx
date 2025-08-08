@@ -42,6 +42,7 @@ export default async function RootLayout({
 
   return (
     <html lang={lang} className={`${manrope.className}`}>
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
       <body className="min-h-[100dvh] bg-gray-50 text-black dark:bg-gray-950 dark:text-white">
         <LanguageProvider initialLanguage={lang}>
           <SWRConfig

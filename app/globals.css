@@ -273,3 +273,44 @@
     @apply bg-background text-foreground;
   }
 }
+/* ==================== */
+/* Grid Layout System   */
+/* ==================== */
+
+/* Base grid container */
+.grid-container {
+  display: grid;
+  width: 100%;
+  gap: 1.5rem; /* 24px spacing between items */
+}
+
+/* Single column by default */
+.grid-cols-1 {
+  grid-template-columns: 1fr;
+}
+
+/* Two columns on medium screens (768px and up) */
+@media (min-width: 48rem) { /* 768px */
+  .grid-cols-md-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Safari-specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .grid-container {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: grid;
+    -webkit-box-align: stretch;
+    -ms-flex-align: stretch;
+    align-items: stretch;
+  }
+  
+  @media (min-width: 48rem) {
+    .grid-cols-md-2 {
+      -ms-grid-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
