@@ -122,7 +122,15 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "54322:5432"
-    volumes:
+    volumes:    1. Go to vercel.com and sign up/login
+    2. Import your GitHub repository
+    3. In the project settings, add these environment variables:
+       - DATABASE_URL (paste your Neon connection string)
+       - NEXTAUTH_URL (will be your domain or https://your-project.vercel.app)
+       - NEXTAUTH_SECRET (generate one with: openssl rand -base64 32)
+       - STRIPE_SECRET_KEY
+       - STRIPE_WEBHOOK_SECRET
+    4. Deploy your project
       - postgres_data:/var/lib/postgresql/data
 
 volumes:
