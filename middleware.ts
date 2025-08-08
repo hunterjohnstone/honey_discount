@@ -14,10 +14,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-    // Verify session for protected routes
-  if (!session && !path.startsWith('/login')) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
 
   const { pathname } = request.nextUrl;
   const sessionCookie = request.cookies.get('session');
