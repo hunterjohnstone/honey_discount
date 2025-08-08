@@ -50,10 +50,13 @@ export async function setSession(user: NewUser) {
     expires: expiresInOneDay.toISOString(),
   };
   const encryptedSession = await signToken(session);
+  
   (await cookies()).set('session', encryptedSession, {
     expires: expiresInOneDay,
     httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production', // Only secure in production
+    sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none', // Adjust for Safari
+    path: '/', // Explicit path
+    domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : undefined
   });
 }

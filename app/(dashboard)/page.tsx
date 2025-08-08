@@ -76,9 +76,6 @@ const DiscoverPage = () => {
         <title>Discover Promotions</title>
         <meta name="description" content="Find the latest promotions and deals" />
       </Head>
-      <div className="p-4 bg-blue-100 dark:bg-blue-900 rounded-lg">
-      <h1 className="text-2xl font-bold">{t('welcome')}</h1>
-    </div>
       <main className="container mx-auto py-8 px-4">
         <div className="flex justify-between items-center mb-6">
           <Button

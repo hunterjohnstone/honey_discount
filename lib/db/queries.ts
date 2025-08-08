@@ -7,15 +7,17 @@ import { resumePluginState } from 'next/dist/build/build-context';
 import { productReviews } from "./schema"; // Import your schema tables
 import { number } from 'zod';
 import { Promotion } from '@/app/(dashboard)/promotionForms/types';
+import { NextRequest } from 'next/server';
 
 
-export async function getUser() {
-  const sessionCookie = (await cookies()).get('session');
+export async function getUser(request?: NextRequest) {
+  const cookieStore = request ? request.cookies : cookies();
+  const sessionCookie = (await cookieStore).get('session');
   if (!sessionCookie || !sessionCookie.value) {
     return null;
   }
-
-  const sessionData = await verifyToken(sessionCookie.value);
+  try {
+    const sessionData = await verifyToken(sessionCookie.value);
   if (
     !sessionData ||
     !sessionData.user ||
@@ -39,6 +41,11 @@ export async function getUser() {
   }
 
   return user[0];
+    
+  } catch (error) {
+    console.error('Session verification failed:', error);
+    return null;
+  }
 }
 
 export async function getTeamByStripeCustomerId(customerId: string) {
