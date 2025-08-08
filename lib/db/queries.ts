@@ -10,40 +10,58 @@ import { Promotion } from '@/app/(dashboard)/promotionForms/types';
 import { NextRequest } from 'next/server';
 
 
-export async function getUser(request?: NextRequest) {
-  const cookieStore = request ? request.cookies : cookies();
-  const sessionCookie = (await cookieStore).get('session');
-  if (!sessionCookie || !sessionCookie.value) {
-    return null;
-  }
+interface SessionUser {
+  id: number;
+  [key: string]: any;
+}
+
+interface SessionData {
+  user: SessionUser;
+  expires: string;
+}
+
+export async function getUser(request?: NextRequest): Promise<typeof users.$inferSelect | null> {
   try {
-    const sessionData = await verifyToken(sessionCookie.value);
-  if (
-    !sessionData ||
-    !sessionData.user ||
-    typeof sessionData.user.id !== 'number'
-  ) {
-    return null;
-  }
+    const cookieStore = request ? request.cookies : cookies();
+    const sessionCookie =(await cookieStore).get('session');
+    
+    if (!sessionCookie?.value) {
+      console.debug('No session cookie found');
+      return null;
+    }
 
-  if (new Date(sessionData.expires) < new Date()) {
-    return null;
-  }
+    const sessionData = await verifyToken(sessionCookie.value) as SessionData;
+    
+    if (!sessionData?.user?.id) {
+      console.debug('Invalid session data structure');
+      return null;
+    }
 
-  const user = await db
-    .select()
-    .from(users)
-    .where(and(eq(users.id, sessionData.user.id), isNull(users.deletedAt)))
-    .limit(1);
+    if (new Date(sessionData.expires) < new Date()) {
+      console.debug('Session expired');
+      return null;
+    }
 
-  if (user.length === 0) {
-    return null;
-  }
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(
+        and(
+          eq(users.id, sessionData.user.id),
+          isNull(users.deletedAt)
+        )
+      )
+      .limit(1);
 
-  return user[0];
+    if (!user) {
+      console.debug('User not found in database');
+      return null;
+    }
+
+    return user;
     
   } catch (error) {
-    console.error('Session verification failed:', error);
+    console.error('Error in getUser:', error instanceof Error ? error.message : error);
     return null;
   }
 }
@@ -148,31 +166,40 @@ interface ProductReport {
 }
 
 const parseReported = (reportedString: string) => {
+  if (!reportedString?.trim()) return [];
+  
   try {
-    // Handle empty or invalid cases
-    if (!reportedString || reportedString === '[]') return [];
-    
-    // Fix common string formatting issues
-    const fixedString = reportedString
-      .replace(/(\w+):/g, '"$1":')  // Add quotes around keys
-      .replace(/'/g, '"')           // Replace single quotes with double
-      .replace(/\\"/g, '"')         // Remove escape characters
-      .replace(/object Object/g, ''); // Remove "object Object" text
-    
-    // Parse the JSON string
-    const parsed = JSON.parse(`[${fixedString}]`) as ProductReport[];
-    
-    // Validate and transform the parsed data
-    return parsed.map(item => ({
-      ...item,
-    })) as ProductReport[];
-    
+    const cleanString = reportedString.trim();    
+    try {
+      const directParse = JSON.parse(cleanString);
+      return Array.isArray(directParse) ? directParse : [directParse];
+    } catch (directError) {
+      try {
+        return JSON.parse(`[${cleanString}]`);
+      } catch (arrayError) {
+        const fixedString = cleanString
+          .replace(/([{,]\s*)([a-zA-Z0-9_]+)(\s*:)/g, '$1"$2"$3') // Quote keys
+          .replace(/'/g, '"') // Single to double quotes
+          .replace(/(\w+)(\s*:\s*)([^"][^,}]+)([,}])/g, '$1$2"$3"$4'); // Quote unquoted values
+        
+        try {
+          return JSON.parse(fixedString);
+        } catch (finalError) {
+          console.error('Failed to parse after all attempts:', {
+            original: reportedString,
+            cleaned: cleanString,
+            fixed: fixedString,
+            error: finalError
+          });
+          return [];
+        }
+      }
+    }
   } catch (error) {
-    console.error('Failed to parse reported data:', error);
+    console.error('Unexpected error in parseReported:', error);
     return [];
   }
-}
-
+};
 
 export async function getProductData() {
   const results = await db.query.products.findMany();
