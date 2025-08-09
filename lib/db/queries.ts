@@ -1,12 +1,9 @@
-import { desc, and, eq, isNull, StringChunk } from 'drizzle-orm';
+import { desc, and, eq, isNull } from 'drizzle-orm';
 import { db } from './drizzle';
 import { activityLogs, products, teamMembers, teams, users } from './schema';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth/session';
-import { resumePluginState } from 'next/dist/build/build-context';
 import { productReviews } from "./schema"; // Import your schema tables
-import { number } from 'zod';
-import { Promotion } from '@/app/(dashboard)/promotionForms/types';
 import { NextRequest } from 'next/server';
 
 

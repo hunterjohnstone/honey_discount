@@ -5,6 +5,7 @@ import { NewUser } from '@/lib/db/schema';
 
 const key = new TextEncoder().encode(process.env.AUTH_SECRET);
 const SALT_ROUNDS = 10;
+const isProduction = process.env.NODE_ENV === 'production';
 
 export async function hashPassword(password: string) {
   return hash(password, SALT_ROUNDS);
@@ -55,11 +56,11 @@ export async function setSession(user: NewUser) {
   
   (await cookies()).set('session', encryptedSession, {
     httpOnly: true,
-    secure: true,
+    secure: isProduction,
     sameSite: 'lax', // Adjust for Safari
     path: '/', // Explicit path
     expires: expiresInOneDay,
     maxAge: 60 * 60 * 24 * 7, // 1 week expiration
-    domain: '.discount-project-snowy.vercel.app'
+    domain: isProduction ? '.discount-project-snowy.vercel.app' : undefined,
   });
 }

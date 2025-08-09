@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { signOut } from '@/app/(login)/actions';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/db/schema';
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 import { useTranslation } from '@/hooks/useTranslation';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -26,9 +26,18 @@ function UserMenu() {
   const t = useTranslation();
 
   async function handleSignOut() {
-    await signOut();
-    router.refresh();
-    router.push('/');
+  // 1. Clear client state first
+  mutate('/api/user', null, false); // SWR cache reset
+  
+  // 2. Perform sign out
+  await signOut();
+  
+  // 3. Navigate and refresh
+  router.push('/');
+  router.refresh();
+  
+  // 4. Close menu
+  setIsMenuOpen(false)
   }
 
   if (!user) {

@@ -36,12 +36,37 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
         <form className="space-y-6" action={formAction}>
           <input type="hidden" name="redirect" value={redirect || ''} />
           <input type="hidden" name="priceId" value={priceId || ''} />
+
+          {mode==='signup' && (
+          <div>
+            <Label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
+            >
+              {t("name")}
+            </Label>
+            <div className="mt-1">
+              <Input
+                id="name"
+                name="name"
+                type="name"
+                autoComplete="name"
+                defaultValue={state.name}
+                maxLength={50}
+                className="appearance-none rounded-full relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
+                placeholder={t("enter your name")}
+              />
+            </div>
+          </div>
+          )}
+          
+
           <div>
             <Label
               htmlFor="email"
               className="block text-sm font-medium text-gray-700"
             >
-              {t("email")}
+              {t("email")}*
             </Label>
             <div className="mt-1">
               <Input
@@ -63,7 +88,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               htmlFor="password"
               className="block text-sm font-medium text-gray-700"
             >
-              {t('password')}
+              {t('password')}*
             </Label>
             <div className="mt-1">
               <Input
@@ -90,7 +115,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
           <div>
             <Button
               type="submit"
-              className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+              className="curor pointer w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
               disabled={pending}
             >
               {pending ? (

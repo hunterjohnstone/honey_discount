@@ -93,5 +93,10 @@
     "submitting": "Submitting...",
     "submit_report": "Submit Report",
     "already_reported": "You have already submitted a report, if there is an issue, please contact us",
-    "error_submitting": "There was an error submitting your report."
+    "error_submitting": "There was an error submitting your report.",
+    "name": "Name",
+    "enter your name": "Enter your name",
+    "account for email address" : "There is already an account associated with that email address.",
+    "failed to create user" : "Failed to create user. Please try again.",
+    "comment field required for review": "Comment section is required for leaving a review."
   }

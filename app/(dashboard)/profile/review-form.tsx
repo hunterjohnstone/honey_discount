@@ -6,6 +6,7 @@ import { User } from '@/lib/db/schema';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
 import { useTranslation } from '@/hooks/useTranslation';
+import { REVIEW_ERROR, ReviewApiResponse } from '../types';
 
 type Review = {
     userName: string | null;
@@ -60,10 +61,16 @@ export function ReviewForm({ productId }: {
     }, [])
     
     const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      setIsSubmitting(true);
+      e.preventDefault(); // Move this to top
 
       try {
+
+        setIsSubmitting(true);
+        if (!comment.trim()) {
+          toast.info(t('comment field required for review'));
+          setIsSubmitting(false);
+          return;
+        }
         const response = await fetch('/api/product-review/post-review', {
           method: 'POST',
           headers: {
@@ -76,13 +83,15 @@ export function ReviewForm({ productId }: {
             userId: user?.id
           })
         });
-    
+
+        const result: ReviewApiResponse = await response.json();
+
+        if (!result.success) {
+          handleApiError(result);
+          return false;
+        }
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(
-            errorData.message || 
-            `Server responded with ${response.status}: ${response.statusText}`
-          );
+          toast.error("something happened it didnt post")
         }
     
         const commentObj = {
@@ -96,15 +105,28 @@ export function ReviewForm({ productId }: {
         toast.success(t('thank you for your comment'));
     
       } catch (error) {
-        console.error('Review submission failed:', error);
-        toast.error("Failed to submit review");
-        
+          toast.error("something happened it didnt post")
+          return false;
       } finally {
-        setComment('');
-        setRating(0);
-        setIsSubmitting(false);
-      }
+            setComment('');
+            setRating(0);
+            setIsSubmitting(false);
+        }
     };
+
+    const handleApiError = (response: Extract<ReviewApiResponse, { success: false }>) => {
+      switch (response.error) {
+        case REVIEW_ERROR.MISSING_FIELD:
+          toast.error("Please fill out all of the fields")
+          break;
+        case REVIEW_ERROR.COMMENT_ALREADY_LEFT:
+          toast.info("You've already left a review for this product")
+          break;
+        default:
+          toast.error("An unknown error occurred")
+      }
+    }
+
     if (!user) {
       return (
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
@@ -214,7 +236,6 @@ export function ReviewForm({ productId }: {
             value={comment}
             placeholder={t('share_thoughts')}
             onChange={(e) => setComment(e.target.value)}
-            required
           />
         </div>
 

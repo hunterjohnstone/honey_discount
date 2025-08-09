@@ -102,10 +102,11 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 const signUpSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
+  name: z.string().max(100).optional(),
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
-  const { email, password } = data;
+  const { email, password, name } = data;
 
   const existingUser = await db
     .select()
@@ -115,7 +116,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   if (existingUser.length > 0) {
     return {
-      error: 'Failed to create user. Please try again.',
+      error: 'account for email address',
       email,
       password
     };
@@ -125,6 +126,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   const newUser: NewUser = {
     email,
+    name: name ? name : null,
     passwordHash,
     role: 'owner'
   };
@@ -133,7 +135,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   if (!createdUser) {
     return {
-      error: 'Failed to create user. Please try again.',
+      error: "failed to create user",
       email,
       password
     };
@@ -189,6 +191,7 @@ export async function signOut() {
   const userWithTeam = await getUserWithTeam(user.id);
   await logActivity(userWithTeam?.teamId, user.id, ActivityType.SIGN_OUT);
   (await cookies()).delete('session');
+  if (process.env.NODE_ENV === 'production') {
       (await cookies()).set({
       name: 'session',
       value: '',
@@ -196,6 +199,9 @@ export async function signOut() {
       domain: 'discount-project-snowy.vercel.app',
       path: '/',
     });
+  }
+  redirect('/');
+
 };
 
 const updatePasswordSchema = z.object({

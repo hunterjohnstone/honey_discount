@@ -93,5 +93,10 @@
     "submitting": "Enviando...",
     "submit_report": "Enviar Reporte",
     "already_reported": "Ya has enviado un reporte, si hay algún problema, por favor contáctanos",
-    "error_submitting": "Hubo un error al enviar tu reporte."
+    "error_submitting": "Hubo un error al enviar tu reporte.",
+    "name": "Nombre",
+    "enter your name": "Ingresa tu nombre",
+    "account for email address" : "Ya hay una cuenta asociada a ese correo electrónico.",
+    "failed to create user" : "No se pudo crear el usuario. Inténtalo de nuevo.",
+    "comment field required for review": "La sección de comentarios es necesaria para dejar una reseña."
 }
