@@ -99,11 +99,11 @@
     "failed to create user" : "No se pudo crear el usuario. Inténtalo de nuevo.",
     "comment field required for review": "La sección de comentarios es necesaria para dejar una reseña.",
     "categories" : "Categorías",
-    "max_price": "preci maximo",
-    "min_price": "precio minimo",
-    "minimum_rating": "Min rating",
-    "clear_all": "borrar todo",
-    "apply_filters": "filtros",
+    "max_price": "Precio máximo",
+    "min_price": "Precio mínimo",
+    "minimum_rating": "Calificación mínima",
+    "clear_all": "Borrar todo",
+    "apply_filters": "Filtros",
     "title_required": "Título es requerido",
     "category_required": "Categoría es requerida",
     "select_category": "Seleccione una categoría",
@@ -126,6 +126,7 @@
     "complete_details": "Detalles completos sobre tu promoción...",
     "example_image": "https://ejemplo.com/imagen.jpg",
     "full_description": "Descripción largo",
-    "description_required": "Descripción es requerido"
+    "description_required": "Descripción es requerido",
+    "invalid_end_date": "Fecha de finalización no válida"
 
 }
