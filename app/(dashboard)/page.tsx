@@ -15,7 +15,7 @@ import AddPromoForm from './promotionForms/addPromoForm';
 import { Pagination } from '@/components/ui/pagination';
 import { usePromotions } from './hooks/usePromo';
 import MapWrapper from '@/components/mapWrapper';
-import { MapPinIcon, XIcon } from 'lucide-react';
+import { FilterIcon, MapPinIcon, StarIcon, XIcon } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
@@ -43,6 +43,14 @@ const DiscoverPage = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200]);
   const [locationFilter, setLocationFilter] = useState<string>('all');
 
+  //filter modal
+  const [showFiltersModal, setShowFiltersModal] = useState(false);
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(150);
+  const [ratingFilter, setRatingFilter] = useState<number | null>(null);
+  const priceOptions = [0, 5, 10, 15, 20, 30, 40, 50, 60,70,80,90,100,120,140,150];
+
+
   const t = useTranslation();
 
   useEffect(() => {
@@ -64,11 +72,15 @@ const DiscoverPage = () => {
     if (locationFilter !== 'all') {
       results = results.filter(p => p.location === locationFilter);
     }
-    const priceNum = 
-    results = results.filter(p => parseFloat(p.price) >= priceRange[0] && parseFloat(p.price) <= priceRange[1]);
-    
+
+  results = results.filter(p => parseFloat(p.price) >= priceRange[0] && parseFloat(p.price) <= priceRange[1]);
+
+  if (ratingFilter) {
+    results = results.filter(p => p.starAverage >= ratingFilter);
+  }
+
     setFilteredPromotions(results);
-  }, [categoryFilter, locationFilter, priceRange, promotions]);
+  }, [categoryFilter, locationFilter, priceRange, promotions, ratingFilter]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-3">
@@ -77,29 +89,36 @@ const DiscoverPage = () => {
         <meta name="description" content="Find the latest promotions and deals" />
       </Head>
       <main className="container mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-6">
-          <Button
-            onClick={() => setShowMapModal(true)}
-            className="cursor-pointer flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors"
-          >
-            <MapPinIcon className="w-5 h-5" />
-            {t('map')}
-          </Button>
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setShowFiltersModal(true)}
+                variant="outline"
+                className="gap-2 cursor-pointer"
+              >
+                <FilterIcon className="w-4 h-4" />
+                {t('filters')}
+              </Button>
+              <Button
+                onClick={() => setShowMapModal(true)}
+                className="gap-2 cursor-pointer"
+              >
+                <MapPinIcon className="w-4 h-4" />
+                {t('map')}
+              </Button>
+            </div>
             <Button
-            onClick={() => (
-              !user ?  router.push('/sign-up') :
-              setIsAddingPromotion(true))}
-            className="cursor-pointer"
-          >
-            {t("add new promotion")}
-          </Button>
-        </div>
+              onClick={() => (!user ? router.push('/sign-up') : setIsAddingPromotion(true))}
+            >
+              {t("add new promotion")}
+            </Button>
+          </div>
         
 
         {/* Filters */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
           <div className="flex flex-col flex-row items-center justify-between gap-4 mb-6">
-            <h2 className="text-xl font-semibold text-gray-800">{t('filters')}</h2>
+            <h2 className="text-xl font-semibold text-gray-800">{t('category')}</h2>
             <button
               onClick={() => {
                 setCategoryFilter('all');
@@ -117,61 +136,196 @@ const DiscoverPage = () => {
             style={{
               gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))'
             }}
-          >            
+          >
+
           {/* Category Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{t('category')}</label>
-              <div className="relative">
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-lg transition-all appearance-none bg-white"
-                >
-                  <option value="all">{t('all_categories')}</option>
-                  <option value="food">{t('food_dining')}</option>
-                  <option value="fitness">{t('fitness')}</option>
-                  <option value="electronics">{t('electronics')}</option>
-                  <option value="retail">{t('retail')}</option>
-                  <option value="services">{t('services')}</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                  <svg 
-                    className="h-5 w-5 text-gray-400" 
-                    viewBox="0 0 20 20" 
-                    fill="currentColor"
+          <div>
+            {/* <label className="block text-sm font-medium text-gray-700 mb-2">{t('category')}</label> */}
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {[
+                { value: 'all', icon: 'Globe', label: t('all_categories') },
+                { value: 'food', icon: 'Utensils', label: t('food_dining') },
+                { value: 'fitness', icon: 'Dumbbell', label: t('fitness') },
+                { value: 'electronics', icon: 'Smartphone', label: t('electronics') },
+                { value: 'retail', icon: 'ShoppingBag', label: t('retail') },
+                { value: 'services', icon: 'Scissors', label: t('services') },
+              ].map((item) => {
+                const IconComponent = require('lucide-react')[item.icon];
+                return (
+                  <button
+                    key={item.value}
+                    onClick={() => setCategoryFilter(item.value)}
+                    className={`
+                      flex flex-col items-center justify-center p-3 rounded-lg transition-all
+                      border hover:border-gray-300 cursor-pointer
+                      ${categoryFilter === item.value
+                        ? 'bg-blue-50 border-blue-300 text-blue-600 shadow-sm'
+                        : 'bg-white border-gray-200 text-gray-600'}
+                    `}
+                    aria-label={item.label}
                   >
-                    <path 
-                      fillRule="evenodd" 
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" 
-                      clipRule="evenodd" 
-                    />
-                  </svg>
+                    <IconComponent className="w-5 h-5 mb-1" />
+                    <span className="text-xs text-center">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          </div>
+        </div>
+
+        {showFiltersModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Blurred Background */}
+          <div 
+            className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+            onClick={() => setShowFiltersModal(false)}
+          />
+          
+          {/* Modal Container */}
+          <div className="relative z-50 bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-white p-4 border-b flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-800">{t('filters')}</h2>
+              <button 
+                onClick={() => setShowFiltersModal(false)}
+                className="cursor-pointer p-1 rounded-full hover:bg-gray-100"
+              >
+                <XIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Filters Content */}
+            <div className="p-6 space-y-6">
+              {/* Price Range Section */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-4">
+                  {t('price_range')}
+                </h3>
+                
+                {/* Price */}
+                <div className="mb-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">
+                        {t('min_price')}
+                      </label>
+                      <select
+                        value={minPrice}
+                        onChange={(e) => setMinPrice(Number(e.target.value))}
+                        className="w-full p-2 border rounded-lg"
+                      >
+                        {priceOptions.map(price => (
+                          <option key={`min-${price}`} value={price}>
+                            €{price}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">
+                        {t('max_price')}
+                      </label>
+                      <select
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(Number(e.target.value))}
+                        className="w-full p-2 border rounded-lg"
+                      >
+                        {priceOptions.map(price => (
+                          <option key={`max-${price}`} value={price}>
+                            €{price}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Categories Section */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-4">
+                  {t('categories')}
+                </h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { value: 'all', icon: 'Globe', label: t('all_categories') },
+                    { value: 'food', icon: 'Utensils', label: t('food_dining') },
+                    { value: 'fitness', icon: 'Dumbbell', label: t('fitness') },
+                    { value: 'electronics', icon: 'Smartphone', label: t('electronics') },
+                    { value: 'retail', icon: 'ShoppingBag', label: t('retail') },
+                    { value: 'services', icon: 'Scissors', label: t('services') },
+                  ].map((item) => {
+                    const IconComponent = require('lucide-react')[item.icon];
+                    return (
+                      <button
+                        key={item.value}
+                        onClick={() => setCategoryFilter(item.value)}
+                        className={`
+                          cursor-pointer flex flex-col items-center p-3 rounded-lg border transition-colors
+                          ${categoryFilter === item.value
+                            ? 'bg-blue-50 border-blue-300 text-blue-600'
+                            : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}
+                        `}
+                      >
+                        <IconComponent className="w-5 h-5 mb-1" />
+                        <span className="text-xs">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Rating Filter */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-4">
+                  {t('minimum_rating')}
+                </h3>
+                <div className="flex space-x-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => setRatingFilter(ratingFilter === star ? null : star)}
+                      className={`
+                        cursor-pointer p-2 rounded-lg border transition-colors
+                        ${ratingFilter && star <= ratingFilter
+                          ? 'bg-yellow-50 border-yellow-300 text-yellow-500'
+                          : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50'}
+                      `}
+                    >
+                      <StarIcon className="w-5 h-5 fill-current" />
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
-            {/* Price Range Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('price_range')}: <span className="font-semibold">€{priceRange[0]} - €{priceRange[1]}</span>
-              </label>
-              <div className="space-y-2">
-                <input
-                  type="range"
-                  min="0"
-                  max="80"
-                  step="5"
-                  value={priceRange[1]}
-                  onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                  className="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-600"
-                />
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>€0</span>
-                  <span>€80</span>
-                </div>
-              </div>
+
+            {/* Footer with Apply/Clear Buttons */}
+            <div className="sticky bottom-0 bg-white p-4 border-t flex justify-between">
+              <button
+                onClick={() => {
+                  setCategoryFilter('all');
+                  setMinPrice(0);
+                  setMaxPrice(150);
+                  setRatingFilter(null);
+                }}
+                className="cursor-pointer px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                {t('clear_all')}
+              </button>
+              <Button
+                onClick={() => {
+                  setPriceRange([minPrice, maxPrice]);
+                  setShowFiltersModal(false);
+                }}
+                className="cursor-pointer px-4 py-2 rounded-lg"
+              >
+                {t('apply_filters')}
+              </Button>
             </div>
           </div>
         </div>
+      )}
         {isAddingPromotion && user && <AddPromoForm userId={user.id} onSuccess={fetchData}></AddPromoForm>}
 
         {/* MAPP */}
@@ -219,7 +373,7 @@ const DiscoverPage = () => {
             <div 
                 className="grid gap-6"
                 style={{
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))'
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, clamp(250px, 30vw, 300px)), 1fr)'
                 }}
               >
                 {filteredPromotions.map((promotion) => (

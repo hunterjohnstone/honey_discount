@@ -55,7 +55,6 @@
     "reviews": "Reseñas",
     "leave_review": "Dejar una reseña",
     "share_thoughts": "¡Comparte tu opinión!",
-    "submitting": "Enviando...",
     "submit_review": "Enviar Reseña",
     "no_reviews": "Aún no hay reseñas",
     "be_first_review": "Aún no hay reseñas. ¡Sé el primero en compartir tu opinión!",
@@ -98,5 +97,11 @@
     "enter your name": "Ingresa tu nombre",
     "account for email address" : "Ya hay una cuenta asociada a ese correo electrónico.",
     "failed to create user" : "No se pudo crear el usuario. Inténtalo de nuevo.",
-    "comment field required for review": "La sección de comentarios es necesaria para dejar una reseña."
+    "comment field required for review": "La sección de comentarios es necesaria para dejar una reseña.",
+    "categories" : "Categorías",
+    "max_price": "preci maximo",
+    "min_price": "precio minimo",
+    "minimum_rating": "Min rating",
+    "clear_all": "borrar todo",
+    "apply_filters": "filtros"
 }
