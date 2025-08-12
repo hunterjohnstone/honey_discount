@@ -21,6 +21,7 @@ export const promotionsAtomState = atom<Promotion[]>([
         reported: [],
         longDescription: "",
         discount: "0%",
+        website: "",
     }
   ]
 );
@@ -44,6 +45,8 @@ export const editPromotionState = atom<Promotion>({
   userId: 1,
   longDescription: "",
   discount: "0%",
+  website: "",
+
 });
 export const isEditingPromotionAtom = atom<Boolean>(false);
 export const isAddingPromotionAtom = atom<Boolean>(false);

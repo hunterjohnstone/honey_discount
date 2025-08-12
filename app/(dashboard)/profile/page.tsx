@@ -41,7 +41,8 @@ export default function ProfilePage() {
     userId: 1,
     longDescription: "",
     discount: "0%",
-    oldPrice: "0.0"
+    oldPrice: "0.0",
+    website: "",
 });
 const {data: user } = useSWR<User>('/api/user', fetcher);
 
