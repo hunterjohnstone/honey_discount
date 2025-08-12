@@ -126,5 +126,8 @@
     "brief_description": "Brief description that will appear in listings...",
     "complete_details": "Complete details about your promotion...",
     "full_description": "Full description",
-    "example_image": "https://example.com/image.jpg"
+    "example_image": "https://example.com/image.jpg",
+    "website": "Website",
+    "visit_website": "Visit website"
+
 }

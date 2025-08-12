@@ -28,6 +28,7 @@ CREATE TABLE "products" (
 	"image_url" varchar(200),
 	"map_location" "point",
 	"category" varchar(100),
+	"website" varchar,
 	"start_date" varchar(100),
 	"end_date" varchar(100),
 	"location" varchar(100),

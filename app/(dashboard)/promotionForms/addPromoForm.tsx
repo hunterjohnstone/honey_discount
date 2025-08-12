@@ -29,6 +29,7 @@ const promotionSchema = z.object({
   price: z.string().min(1, 'Price is required').regex(/^\d*\.?\d{0,2}$/, 'Invalid price format (e.g. 12.99)'),
   oldPrice: z.string().min(1, 'Original price is required').regex(/^\d*\.?\d{0,2}$/, 'Invalid price format (e.g. 24.99)'),
   location: z.string().min(1, 'Location is required'),
+  website: z.string(),
   startDate: z.string()
     .optional()
     .refine(val => !val || !isNaN(new Date(val).getTime()), {
@@ -117,6 +118,7 @@ const [mapLocation, setMapLocation] = useState<{
         userId,
         isActive: true,
         mapLocation: mapLocation ? [mapLocation?.coordinates[0], mapLocation?.coordinates[1]] : undefined,
+        website: data.website,
       };
 
       await fetch('/api/product/put_data', {
@@ -124,7 +126,7 @@ const [mapLocation, setMapLocation] = useState<{
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(promotionToAdd),
+        body: JSON.stringify( promotionToAdd),
       });
 
       onSuccess();
@@ -362,6 +364,16 @@ const [mapLocation, setMapLocation] = useState<{
                 {...register('imageUrl')}
                 className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 placeholder={t("example_image")}
+              />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="website" className="block text-sm font-medium text-gray-700">{t("website")}*</label>
+              <input
+                id="website"
+                {...register('website')}
+                type="url"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                placeholder={t("website")}
               />
             </div>
           </div>

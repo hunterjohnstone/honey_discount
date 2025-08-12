@@ -39,6 +39,7 @@ export type InputPromotionSchema = {
     userId: number;
     longDescription: string;
     discount: string;
+    website: string | undefined
   };
 
   export const basePromoObject: Promotion = {
@@ -60,4 +61,5 @@ export type InputPromotionSchema = {
     isActive: true,
     discount: "0%",
     oldPrice: "",
+    website: undefined,
   };

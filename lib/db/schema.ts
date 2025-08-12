@@ -25,6 +25,7 @@ export const products = pgTable('products', {
   imageUrl: varchar('image_url', {length: 200}),
   mapLocation: point("map_location"),
   category: varchar('category', {length: 100}),
+  website: varchar('website'),
   startDate: varchar('start_date', {length: 100}),
   endDate: varchar('end_date', {length: 100}),
   location: varchar('location', {length: 100}),

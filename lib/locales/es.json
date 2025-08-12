@@ -103,7 +103,7 @@
     "min_price": "Precio mínimo",
     "minimum_rating": "Calificación mínima",
     "clear_all": "Borrar todo",
-    "apply_filters": "Filtros",
+    "apply_filters": "Aplicar filtros",
     "title_required": "Título es requerido",
     "category_required": "Categoría es requerida",
     "select_category": "Seleccione una categoría",
@@ -127,6 +127,7 @@
     "example_image": "https://ejemplo.com/imagen.jpg",
     "full_description": "Descripción largo",
     "description_required": "Descripción es requerido",
-    "invalid_end_date": "Fecha de finalización no válida"
-
+    "invalid_end_date": "Fecha de finalización no válida",
+    "website": "Sitio web",
+    "visit_website": "Visitar sitio web"
 }

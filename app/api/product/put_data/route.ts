@@ -24,6 +24,7 @@ import { NextResponse } from 'next/server';
         location: data.location,
         isActive: true,
         userId: data.userId,
+        website: data.website,
         createdAt: new Date(),
         updatedAt: new Date(),
       });

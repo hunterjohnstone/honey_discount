@@ -114,6 +114,20 @@ export default function PromotionPage() {
               €{promotion.price}
             </span>
           </div>
+          {/* Add Website Link Here */}
+          {promotion.website && (
+            <a 
+              href={promotion.website.startsWith('http') ? promotion.website : `https://${promotion.website}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+              {t('visit_website')}
+            </a>
+          )}
           {user && (
             <button 
               className="text-xs sm:text-sm text-gray-500 cursor-pointer hover:text-red-500 flex items-center gap-1 transition-colors"
