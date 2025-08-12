@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import { useState } from 'react';
 // import { LocationPicker } from '@/components/locationPicker';
 import LocationFormWrapper from '@/components/locationFormWrapper';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const safeDateDisplay = (dateString: string | undefined, fallback = '') => {
   if (!dateString) return fallback;
@@ -76,6 +77,9 @@ const [mapLocation, setMapLocation] = useState<{
     }
   });
 
+  const t = useTranslation()
+
+
   const handlePriceChange = (field: 'price' | 'oldPrice', e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     // Allow empty string, numbers, and one decimal point
@@ -136,7 +140,7 @@ const [mapLocation, setMapLocation] = useState<{
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl border border-gray-100 flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-200 sticky top-0 z-10">
-          <h2 className="text-2xl font-bold text-gray-800">Create New Promotion</h2>
+          <h2 className="text-2xl font-bold text-gray-800">{t('create_promotion')}</h2>
           <button
             onClick={() => setIsAddingPromotion(false)}
             className="cursor-pointer text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1"
@@ -154,64 +158,66 @@ const [mapLocation, setMapLocation] = useState<{
             {/* Title and Category */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-1">
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title*</label>
-                <input
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                  {t('title')}*
+                </label>    
+              <input
                   id="title"
                   {...register('title')}
                   className={`w-full px-3 py-2 border ${errors.title ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                  placeholder="Summer Special"
+                  placeholder={t("summer_special")}
                 />
-                {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
+                {errors.title && <p className="mt-1 text-sm text-red-600">{t('title_required')}</p>}
               </div>
               
               <div className="space-y-1">
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category*</label>
+                <label htmlFor="category" className="block text-sm font-medium text-gray-700">{t("category")}*</label>
                 <select
                   id="category"
                   {...register('category')}
                   className={`w-full px-3 py-2 border ${errors.category ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 >
-                  <option value="">Select a category</option>
-                  <option value="food">Food & Dining</option>
-                  <option value="fitness">Fitness</option>
-                  <option value="electronics">Electronics</option>
-                  <option value="retail">Retail</option>
-                  <option value="services">Services</option>
+                  <option value="">{t("select_category")}</option>
+                  <option value="food">{t("food_dining")}</option>
+                  <option value="fitness">{t("fitness")}</option>
+                  <option value="electronics">{t("electronics")}</option>
+                  <option value="retail">{t("retail")}</option>
+                  <option value="services">{t("services")}</option>
                 </select>
-                {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>}
+                {errors.category && <p className="mt-1 text-sm text-red-600">{t('category_required')}</p>}
               </div>
             </div>
 
             {/* Descriptions */}
             <div className="space-y-1">
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">Short Description*</label>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700">{t("short_description")}*</label>
               <textarea
                 id="description"
                 {...register('description')}
                 className={`w-full px-3 py-2 border ${errors.description ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 rows={3}
-                placeholder="Brief description that will appear in listings..."
+                placeholder={t("brief_description")}
               />
-              {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
+              {errors.description && <p className="mt-1 text-sm text-red-600">{t('short_description_required')}</p>}
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="longDescription" className="block text-sm font-medium text-gray-700">Full Details*</label>
+              <label htmlFor="longDescription" className="block text-sm font-medium text-gray-700">{t("full_description")}*</label>
               <textarea
                 id="longDescription"
                 {...register('longDescription')}
                 className={`w-full px-3 py-2 border ${errors.longDescription ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 rows={5}
-                placeholder="Complete details about your promotion..."
+                placeholder={t("complete_details")}
               />
-              {errors.longDescription && <p className="mt-1 text-sm text-red-600">{errors.longDescription.message}</p>}
+              {errors.longDescription && <p className="mt-1 text-sm text-red-600">{t('description_required')}</p>}
             </div>
 
             {/* Prices */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Discounted Price */}
               <div className="space-y-1">
-                <label htmlFor="price" className="block text-sm font-medium text-gray-700">Discounted Price (€)*</label>
+                <label htmlFor="price" className="block text-sm font-medium text-gray-700">{t("discounted_price")}*</label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">€</span>
                   <input
@@ -224,12 +230,12 @@ const [mapLocation, setMapLocation] = useState<{
                     inputMode="decimal"
                   />
                 </div>
-                {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>}
+                {errors.price && <p className="mt-1 text-sm text-red-600">{t("discounted_price_required")}</p>}
               </div>
               
               {/* Original Price */}
               <div className="space-y-1">
-                <label htmlFor="oldPrice" className="block text-sm font-medium text-gray-700">Original Price (€)*</label>
+                <label htmlFor="oldPrice" className="block text-sm font-medium text-gray-700">{t("original_price")}*</label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">€</span>
                   <input
@@ -242,10 +248,10 @@ const [mapLocation, setMapLocation] = useState<{
                     inputMode="decimal"
                   />
                 </div>
-                {errors.oldPrice && <p className="mt-1 text-sm text-red-600">{errors.oldPrice.message}</p>}
+                {errors.oldPrice && <p className="mt-1 text-sm text-red-600">{t("original_price_required")}</p>}
                 {watch('oldPrice') && watch('price') && (
                   <p className="mt-1 text-sm text-green-600">
-                    Discount: {Math.round((1 - parseFloat(watch('price')) / parseFloat(watch('oldPrice'))) * 100)}%
+                    {t("discount")}: {Math.round((1 - parseFloat(watch('price')) / parseFloat(watch('oldPrice'))) * 100)}%
                   </p>
                 )}
               </div>
@@ -269,7 +275,7 @@ const [mapLocation, setMapLocation] = useState<{
                 {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>}
               </div> */}
               <div className="space-y-1">
-                <label className="block text-sm font-medium text-gray-700">Map Location</label>
+                <label className="block text-sm font-medium text-gray-700">{t("map_location")}</label>
                 <LocationFormWrapper 
                   value={mapLocation}
                   onChange={setMapLocation}
@@ -281,7 +287,7 @@ const [mapLocation, setMapLocation] = useState<{
               {/* Start Date - Optional */}
               <div className="space-y-1">
                 <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
-                  Start Date (optional)
+                  {t("start_date")}
                 </label>
                 <div className="relative">
                   <input
@@ -304,15 +310,15 @@ const [mapLocation, setMapLocation] = useState<{
                   </button>
                 </div>
                 {errors.startDate && (
-                  <p className="mt-1 text-sm text-red-600">{errors.startDate.message}</p>
+                  <p className="mt-1 text-sm text-red-600">{t("invalid_start_date")}</p>
                 )}
               </div>
 
               {/* End Date - Optional */}
               <div className="space-y-1">
                 <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
-                  End Date (optional)
-                  <span className="ml-1 text-xs text-gray-500">(must be after {safeDateDisplay(watch('startDate'), 'start date')})</span>
+                  {t("end_date")}
+                  <span className="ml-1 text-xs text-gray-500">({t("must_be_after")}{safeDateDisplay(watch('startDate'), 'start date')})</span>
                 </label>
                 <div className="relative">
                   <input
@@ -338,26 +344,25 @@ const [mapLocation, setMapLocation] = useState<{
                   </button>
                 </div>
                 {errors.endDate && (
-                  <p className="mt-1 text-sm text-red-600">{errors.endDate.message}</p>
+                  <p className="mt-1 text-sm text-red-600">{t("invalid_end_date")}</p>
                 )}
               </div>
             </div>
             {watch('startDate') && watch('endDate') && (
             <div className="mt-2 text-sm text-green-600">
-              Promotion period: { new Date(safeDateDisplay(watch('startDate'))).toLocaleDateString()} to {new Date(safeDateDisplay(watch('endDate'))).toLocaleDateString()}
+              {t("promotion_period")}: { new Date(safeDateDisplay(watch('startDate'))).toLocaleDateString()} to {new Date(safeDateDisplay(watch('endDate'))).toLocaleDateString()}
             </div>
           )}
             {/* Image URL */}
             <div className="space-y-1">
-              <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">Image URL*</label>
+              <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">{t("image_url")}*</label>
               <input
                 id="imageUrl"
                 type="url"
                 {...register('imageUrl')}
-                className={`w-full px-3 py-2 border ${errors.imageUrl ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                placeholder="https://example.com/image.jpg"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                placeholder={t("example_image")}
               />
-              {errors.imageUrl && <p className="mt-1 text-sm text-red-600">{errors.imageUrl.message}</p>}
             </div>
           </div>
 
@@ -369,7 +374,7 @@ const [mapLocation, setMapLocation] = useState<{
                 onClick={() => setIsAddingPromotion(false)}
                 className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 cursor-pointer hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Cancel
+                {t("cancel")}
               </button>
               <button
                 type="submit"
@@ -382,10 +387,10 @@ const [mapLocation, setMapLocation] = useState<{
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Creating...
+                    {t("creating")}
                   </span>
                 ) : (
-                  'Create Promotion'
+                  `${t("create_promotion")}`
                 )}
               </button>
             </div>

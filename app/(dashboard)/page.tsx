@@ -100,7 +100,7 @@ const DiscoverPage = () => {
               </Button>
             </div>
             {user && (
-            <Button onClick={() => (setIsAddingPromotion(true))}>
+            <Button onClick={() => (setIsAddingPromotion(true))} className='cursor-pointer'>
               {t("add new promotion")}
             </Button>
             )}
