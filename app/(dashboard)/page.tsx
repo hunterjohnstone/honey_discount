@@ -92,14 +92,6 @@ const DiscoverPage = () => {
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">
               <Button
-                onClick={() => setShowFiltersModal(true)}
-                variant="outline"
-                className="gap-2 cursor-pointer"
-              >
-                <FilterIcon className="w-4 h-4" />
-                {t('filters')}
-              </Button>
-              <Button
                 onClick={() => setShowMapModal(true)}
                 className="gap-2 cursor-pointer"
               >
@@ -107,28 +99,19 @@ const DiscoverPage = () => {
                 {t('map')}
               </Button>
             </div>
-            <Button
-              onClick={() => (!user ? router.push('/sign-up') : setIsAddingPromotion(true))}
-            >
+            {user && (
+            <Button onClick={() => (setIsAddingPromotion(true))}>
               {t("add new promotion")}
             </Button>
+            )}
+
           </div>
         
 
         {/* Filters */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-4">
           <div className="flex flex-col flex-row items-center justify-between gap-4 mb-6">
             <h2 className="text-xl font-semibold text-gray-800">{t('category')}</h2>
-            <button
-              onClick={() => {
-                setCategoryFilter('all');
-                setLocationFilter('all');
-                setPriceRange([0, 200]);
-              }}
-              className="cursor-pointer text-sm font-medium text-gray-600 hover:text-black transition-colors"
-            >
-              {t('clear_all_filters')}
-            </button>
           </div>
 
           <div 
@@ -173,6 +156,30 @@ const DiscoverPage = () => {
           </div>
           </div>
         </div>
+
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <Button
+              onClick={() => setShowFiltersModal(true)}
+              variant="outline"
+              className="gap-2 cursor-pointer"
+            >
+              <FilterIcon className="w-4 h-4" />
+              {t('filters')}
+            </Button>
+            <button
+              onClick={() => {
+                setCategoryFilter('all');
+                setLocationFilter('all');
+                setPriceRange([0, 200]);
+              }}
+              className="pl-4 cursor-pointer text-sm font-medium text-gray-600 hover:text-black transition-colors"
+            >
+              {t('clear_all_filters')}
+            </button>
+
+            </div>
+          </div>
 
         {showFiltersModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

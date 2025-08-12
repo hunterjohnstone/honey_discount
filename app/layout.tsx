@@ -14,7 +14,14 @@ export const metadata: Metadata = {
     template: '%s | Discount Granada',
     default: 'Discount Granada'
   },
-  description: 'Encuentra las mejores ofertas y descuentos en Granada!'
+  description: 'Encuentra las mejores ofertas y descuentos en Granada!',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/apple-touch-icon.png', rel: 'apple-touch-icon' },
+    ],
+  },
 };
 
 export const viewport: Viewport = {
