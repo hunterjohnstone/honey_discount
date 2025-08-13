@@ -129,5 +129,10 @@
     "description_required": "Descripción es requerido",
     "invalid_end_date": "Fecha de finalización no válida",
     "website": "Sitio web",
-    "visit_website": "Visitar sitio web"
+    "visit_website": "Visitar sitio web",
+    "menu": "Menú",
+    "profile": "Perfil",
+    "settings": "Configuración",
+    "sign_out": "Cerrar Sesión",
+    "account_settings": "Configuraciónes"
 }

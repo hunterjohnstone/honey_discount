@@ -131,13 +131,6 @@ const {data: user } = useSWR<User>('/api/user', fetcher);
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Your promotions</h1>
-        <Button className="cursor-pointer" onClick={() => setIsAddingPromotionAtom(true)}>
-          Create New Promotion
-        </Button>
-      </div>
-
       {promotions.length === 0 ? (
         <div className="text-center py-12">
           <div className="mx-auto h-24 w-24 text-gray-300 mb-4">
@@ -146,12 +139,24 @@ const {data: user } = useSWR<User>('/api/user', fetcher);
             </svg>
           </div>
           <h3 className="text-xl font-medium text-gray-600">You haven't created any promotions yet</h3>
-          <Button className="mt-4" onClick={() => router.push('/promotions/new')}>
+          <Button className="mt-4 cursor-pointer" onClick={() => setIsAddingPromotionAtom(true)}>
             Create Your First Promotion
           </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-800">Your promotions</h1>
+            <Button className="cursor-pointer" onClick={() => setIsAddingPromotionAtom(true)}>
+              Create New Promotion
+            </Button>
+        </div>
+        <div 
+        className='grid gap-6'
+        style={{
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, clamp(250px, 30vw, 300px)), 1fr)'
+        }}
+        >
           {promotions.map((promotion) => (
             <Card key={promotion.id} className="hover:shadow-lg transition-shadow">
               {editingId === promotion.id ? (
@@ -254,6 +259,7 @@ const {data: user } = useSWR<User>('/api/user', fetcher);
               )}
             </Card>
           ))}
+          </div>
         </div>
       )}
       

@@ -26,6 +26,7 @@ export default function PromotionPage() {
   const { data: user } = useSWR<User>('/api/user', fetcher);
 
   useEffect(() => {
+    window.scrollTo({ top: 4, behavior: 'smooth' })
     fetchPromotion();
   }, []);
 
