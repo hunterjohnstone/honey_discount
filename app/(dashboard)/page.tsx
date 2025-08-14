@@ -6,7 +6,7 @@ import useSWR from 'swr';
 import { User } from '@/lib/db/schema';
 import Link from 'next/link';
 import { useAtom, useSetAtom } from 'jotai';
-import { isAddingPromotionAtom, promotionsAtomState } from './profile/atom_state';
+import { isAddingPromotionAtom } from './profile/atom_state';
 import { RatingDisplay } from './startDisplay';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -110,9 +110,9 @@ const DiscoverPage = () => {
 
         {/* Filters */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-4">
-          <div className="flex flex-col flex-row items-center justify-between gap-4 mb-6">
+          {/* <div className="flex flex-col flex-row items-center justify-between gap-4 mb-6">
             <h2 className="text-xl font-semibold text-gray-800">{t('category')}</h2>
-          </div>
+          </div> */}
 
           <div 
             className="grid gap-6"

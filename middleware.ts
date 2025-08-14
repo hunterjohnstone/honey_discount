@@ -48,7 +48,7 @@ export async function middleware(request: NextRequest) {
         maxAge: 60 * 60 * 24 * 7,
         expires: expiresInOneDay,
         // Domain should be set in production
-        ...(process.env.NODE_ENV === 'production' && { domain: '.discount-project-snowy.vercel.app' })
+        ...(process.env.NODE_ENV === 'production' && { domain: '.https://spanishoffers.com' })
       });
     } catch (error) {
       console.error('Session verification failed:', error);

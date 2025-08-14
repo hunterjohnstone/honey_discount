@@ -196,7 +196,7 @@ export async function signOut() {
       name: 'session',
       value: '',
       expires: new Date(0),
-      domain: 'discount-project-snowy.vercel.app',
+      domain: 'https://spanishoffers.com',
       path: '/',
     });
   }
