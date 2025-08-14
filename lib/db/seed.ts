@@ -46,14 +46,7 @@ const granadaLocations = [
   { name: "Albaicín", lng: -3.592627, lat: 37.180961 }
 ];
 
-function toMapLocation(lng: number, lat: number) {
-  return {
-    type: "Point",
-    coordinates: [lng, lat]
-  };
-}
-
-// Convert coordinates to PostgreSQL point format
+// Convert coordinates to PostgreSQL point format ie., ({"x": "0.1281"}, {"y": "0.1279"})
 function toPoint(lng: number, lat: number) {
   return sql`point(${lng}, ${lat})`;
 }

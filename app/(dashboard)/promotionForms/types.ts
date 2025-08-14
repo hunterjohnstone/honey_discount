@@ -26,7 +26,7 @@ export type InputPromotionSchema = {
     description: string;
     price: string;
     oldPrice: string;
-    imageUrl: string;
+    imageUrl: string | undefined;
     category: string;
     startDate: string | undefined;
     endDate: string | undefined;

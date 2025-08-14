@@ -133,6 +133,7 @@
     "profile": "Profile",
     "settings": "Settings",
     "sign_out": "Sign Out",
-    "account_settings": "Account Settings"
+    "account_settings": "Account Settings",
+    "image_url_info": "You can paste a URL of an online image, or leave this empty and we'll automatically select an appropriate image based on the category."
 
 }

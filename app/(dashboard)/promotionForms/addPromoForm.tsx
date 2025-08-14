@@ -114,12 +114,36 @@ const [mapLocation, setMapLocation] = useState<{
         startDate: data.startDate,
         endDate: data.endDate,
         location: data.location,
-        imageUrl: data.imageUrl || "https://t3.ftcdn.net/jpg/11/86/32/62/360_F_1186326217_w0LDFI0Mv6G8gJnSBypbcVWvX1KWyDh0.jpg",
+        imageUrl: data.imageUrl || undefined,
         userId,
         isActive: true,
         mapLocation: mapLocation ? [mapLocation?.coordinates[0], mapLocation?.coordinates[1]] : undefined,
         website: data.website,
       };
+
+      console.log("promotion field before switch statement (none added): ", promotionToAdd.imageUrl)
+
+      if (!promotionToAdd.imageUrl) {
+        switch (promotionToAdd.category) {
+          case 'food':
+            promotionToAdd.imageUrl = 'https://images.unsplash.com/photo-1551218808-94e220e084d2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+            break;
+          case 'fitness':
+            promotionToAdd.imageUrl = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+            break;
+          case 'electronics':
+            promotionToAdd.imageUrl = 'https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+            break;
+          case 'retail':
+            promotionToAdd.imageUrl = 'https://t3.ftcdn.net/jpg/11/86/32/62/360_F_1186326217_w0LDFI0Mv6G8gJnSBypbcVWvX1KWyDh0.jpg';
+            break;
+          case 'services':
+            promotionToAdd.imageUrl = 'https://media.istockphoto.com/id/1457385092/photo/an-asian-young-technician-service-man-wearing-blue-uniform-checking-cleaning-air-conditioner.jpg?s=612x612&w=0&k=20&c=Tqu5jMzD1TKFO1Fvow6d0JMDsEGU8T3kToP706bQFQI=';
+            //deault 'i.e., services. TODO: IF MORE CATEGORIES ARE ADDED WE NEED TO CHANGE THIS 
+          default: promotionToAdd.imageUrl = 'https://media.istockphoto.com/id/1457385092/photo/an-asian-young-technician-service-man-wearing-blue-uniform-checking-cleaning-air-conditioner.jpg?s=612x612&w=0&k=20&c=Tqu5jMzD1TKFO1Fvow6d0JMDsEGU8T3kToP706bQFQI=';
+        }
+      }
+      console.log("promotion field after switch statement (none added): ", promotionToAdd.imageUrl)
 
       await fetch('/api/product/put_data', {
         method: 'POST',
@@ -357,13 +381,50 @@ const [mapLocation, setMapLocation] = useState<{
           )}
             {/* Image URL */}
             <div className="space-y-1">
-              <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">{t("image_url")}*</label>
+              <div className="flex items-center">
+                <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">
+                  {t("image_url")}
+                </label>
+                <div className="group relative ml-2 inline-flex">
+                  {/* Info icon */}
+                  <button
+                    type="button"
+                    aria-label="Image URL information"
+                    className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 transform px-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 sm:bottom-auto sm:left-full sm:top-1/2 sm:mb-0 sm:ml-2 sm:-translate-y-1/2">
+                    <div className="w-64 rounded-lg bg-gray-700 px-3 py-2 text-xs text-white shadow-lg">
+                      <p>{t('image_url_info')}</p>
+                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 transform sm:-left-1 sm:top-1/2 sm:-translate-y-1/2 sm:rotate-90">
+                        <div className="h-2 w-2 rotate-45 bg-gray-700"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
               <input
                 id="imageUrl"
                 type="url"
                 {...register('imageUrl')}
                 className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 placeholder={t("example_image")}
+                aria-describedby="imageUrlHelp"
               />
             </div>
             <div className="space-y-1">
