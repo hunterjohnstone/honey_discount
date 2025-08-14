@@ -22,7 +22,7 @@ export const products = pgTable('products', {
   oldPrice: numeric('old_price'),
   discount: varchar('discount'),
   longDescription: varchar('long_description'),
-  imageUrl: varchar('image_url', {length: 200}),
+  imageUrl: varchar('image_url', {length: 400}),
   mapLocation: point("map_location"),
   category: varchar('category', {length: 100}),
   website: varchar('website'),

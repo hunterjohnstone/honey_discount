@@ -26,7 +26,7 @@ export function Map({ promotions }: { promotions: Promotion[] }) {
           (promo.mapLocation && (
             <Marker 
             key={promo.id} 
-            position={[promo.mapLocation[1], promo.mapLocation[0]]}
+            position={[promo.mapLocation[0], promo.mapLocation[1]]}
             icon={markerIcon}
           >
             <Popup>

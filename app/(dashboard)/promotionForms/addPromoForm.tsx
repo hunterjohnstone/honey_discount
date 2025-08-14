@@ -6,10 +6,9 @@ import { basePromoObject, Promotion } from "./types";
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'react-toastify';
-import { useState } from 'react';
-// import { LocationPicker } from '@/components/locationPicker';
-import LocationFormWrapper from '@/components/locationFormWrapper';
+import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import { useTranslation } from '@/hooks/useTranslation';
+import AddressAutocomplete, { LocationResult } from './addressPicker';
 
 const safeDateDisplay = (dateString: string | undefined, fallback = '') => {
   if (!dateString) return fallback;
@@ -30,6 +29,11 @@ const promotionSchema = z.object({
   oldPrice: z.string().min(1, 'Original price is required').regex(/^\d*\.?\d{0,2}$/, 'Invalid price format (e.g. 24.99)'),
   location: z.string().min(1, 'Location is required'),
   website: z.string(),
+  mapLocation: z.object({
+    address: z.string(),
+    latitude: z.number(),
+    longitude: z.number()
+  }).nullable(),
   startDate: z.string()
     .optional()
     .refine(val => !val || !isNaN(new Date(val).getTime()), {
@@ -57,10 +61,6 @@ export default function AddPromoForm({ userId, onSuccess }: {
 }) {
   const router = useRouter();
   const setIsAddingPromotion = useSetAtom(isAddingPromotionAtom);
-const [mapLocation, setMapLocation] = useState<{
-  address: string
-  coordinates: [number, number]
-}>()
   const {
     register,
     handleSubmit,
@@ -74,12 +74,14 @@ const [mapLocation, setMapLocation] = useState<{
       ...basePromoObject,
       price: '',
       oldPrice: '',
-      imageUrl: ""
+      imageUrl: "",
+      mapLocation: null
     }
   });
+  
+  const formMapLocation = watch("mapLocation");
 
   const t = useTranslation()
-
 
   const handlePriceChange = (field: 'price' | 'oldPrice', e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -88,6 +90,14 @@ const [mapLocation, setMapLocation] = useState<{
       setValue(field, value);
       trigger(field); // Trigger validation after change
     }
+  };
+
+  const handleAddressSelect = (result: LocationResult) => {
+    setValue("mapLocation", {
+      address: result.address,
+      latitude: result.latitude,
+      longitude: result.longitude
+    }, { shouldValidate: true });
   };
 
   const onSubmit = async (data: PromotionFormData) => {
@@ -117,11 +127,13 @@ const [mapLocation, setMapLocation] = useState<{
         imageUrl: data.imageUrl || undefined,
         userId,
         isActive: true,
-        mapLocation: mapLocation ? [mapLocation?.coordinates[0], mapLocation?.coordinates[1]] : undefined,
-        website: data.website,
+      mapLocation: (data.mapLocation 
+        ? [data.mapLocation.latitude, data.mapLocation.longitude] 
+        : undefined),
+      website: data.website,
       };
 
-      console.log("promotion field before switch statement (none added): ", promotionToAdd.imageUrl)
+      console.log("map location is: ", promotionToAdd.mapLocation);
 
       if (!promotionToAdd.imageUrl) {
         switch (promotionToAdd.category) {
@@ -142,8 +154,9 @@ const [mapLocation, setMapLocation] = useState<{
             //deault 'i.e., services. TODO: IF MORE CATEGORIES ARE ADDED WE NEED TO CHANGE THIS 
           default: promotionToAdd.imageUrl = 'https://media.istockphoto.com/id/1457385092/photo/an-asian-young-technician-service-man-wearing-blue-uniform-checking-cleaning-air-conditioner.jpg?s=612x612&w=0&k=20&c=Tqu5jMzD1TKFO1Fvow6d0JMDsEGU8T3kToP706bQFQI=';
         }
-      }
-      console.log("promotion field after switch statement (none added): ", promotionToAdd.imageUrl)
+      };
+
+      console.log("entire promotion is: ", JSON.stringify(promotionToAdd))
 
       await fetch('/api/product/put_data', {
         method: 'POST',
@@ -300,14 +313,28 @@ const [mapLocation, setMapLocation] = useState<{
                 </select>
                 {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>}
               </div> */}
-              <div className="space-y-1">
+              {/* <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700">{t("map_location")}</label>
                 <LocationFormWrapper 
                   value={mapLocation}
                   onChange={setMapLocation}
+                /> */}
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-gray-700">{t("map_location")}</label>
+                <AddressAutocomplete
+                  accessToken="pk.eyJ1IjoiaHVudGVyam9obnN0MSIsImEiOiJjbWViYTE1ankwNjB2MmxzY3gxa3Vmejl1In0.SQ5RWVjg4F3Zycd_YTul1Q"
+                  onSelect={handleAddressSelect}
+                  onError={(error) => console.error("Geocoder error:", error)}
                 />
+                {formMapLocation?.latitude && (
+                  <div className="text-sm text-gray-500">
+                    Coordinates: {formMapLocation.latitude.toFixed(8)}, {formMapLocation.longitude.toFixed(8)}
+                  </div>
+                )}
+                <input type="hidden" {...register("mapLocation")} />
               </div>
             </div>
+
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Start Date - Optional */}

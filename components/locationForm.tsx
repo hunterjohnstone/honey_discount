@@ -56,7 +56,7 @@ export function LocationForm({
 }) {
   const [mounted, setMounted] = useState(false);
   const [position, setPosition] = useState<[number, number] | null>(
-    value?.coordinates ? [value.coordinates[1], value.coordinates[0]] : null
+    value?.coordinates ? [value.coordinates[0], value.coordinates[1]] : null
   );
   const [address, setAddress] = useState(value?.address || '');
   const mapRef = useRef<any>(null);
@@ -66,33 +66,6 @@ export function LocationForm({
     L.Marker.prototype.options.icon = createLucideMarkerIcon('#FF0000');
     setMounted(true);
   }, []);
-
-  const handleSearch = async () => {
-    if (!address.trim()) return;
-
-    try {
-      const results = await providerRef.current.search({ query: address });
-      if (results.length > 0) {
-        const firstResult = results[0];
-        const newPos: [number, number] = [firstResult.y, firstResult.x];
-        setPosition(newPos);
-        setAddress(firstResult.label);
-        console.log("first result", firstResult)
-        console.log("label: ", firstResult.label)
-        onChange({
-          address: firstResult.label,
-          coordinates: [firstResult.x, firstResult.y]
-        });
-        
-        // Center map on result
-        if (mapRef.current) {
-          mapRef.current.flyTo(newPos, 15);
-        }
-      }
-    } catch (error) {
-      console.error('Search error:', error);
-    }
-  };
 
   const reverseGeocode = async (lat: number, lng: number) => {
     try {
@@ -115,25 +88,8 @@ export function LocationForm({
 
   return (
     <div className="space-y-4">
-      {/* <div className="flex items-center gap-2">
-        <input
-          type="text"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-          placeholder="Search address or click on map"
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        />
-        <button
-          onClick={handleSearch}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        >
-          Search
-        </button>
-      </div> */}
-      
       {mounted ? (
-        <div className="h-64 w-full rounded-lg overflow-hidden border border-gray-200">
+        <div className="h-64 w-full z-40 rounded-lg overflow-hidden border border-gray-200">
           <MapContainer
             center={[37.177336, -3.598557]}
             zoom={13}

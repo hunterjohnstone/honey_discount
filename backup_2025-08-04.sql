@@ -153,7 +153,7 @@ CREATE TABLE public.products (
     old_price numeric,
     discount character varying,
     long_description character varying,
-    image_url character varying(200),
+    image_url character varying(400),
     category character varying(100),
     start_date character varying(100),
     end_date character varying(100),

@@ -103,19 +103,6 @@ export async function POST(request: NextRequest) {
             { status: 200 }
         );
     } catch (error) {
-        // if (error instanceof PostgresError) {
-        //     return NextResponse.json(
-        //         { 
-        //           success: false,
-        //           error: "Database error",
-        //           details: {
-        //             code: error.code,
-        //             message: error.message
-        //           }
-        //         },
-        //         { status: 500 }
-        //     );
-        // }
         
         return NextResponse.json(
             { 

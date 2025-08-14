@@ -25,7 +25,7 @@ CREATE TABLE "products" (
 	"old_price" numeric,
 	"discount" varchar,
 	"long_description" varchar,
-	"image_url" varchar(200),
+	"image_url" varchar(400),
 	"map_location" "point",
 	"category" varchar(100),
 	"website" varchar,
