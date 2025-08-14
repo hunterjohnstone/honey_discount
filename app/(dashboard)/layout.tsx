@@ -157,7 +157,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         className={`cursor-pointer w-full justify-start mt-1 ${
                           pathname === item.href ? 'bg-gray-100' : 'hover:bg-gray-50'
                         }`}
-                        onClick={() => setIsSidebarOpen(false)}
+                        // onClick={() => setIsSidebarOpen(false)}
                       >
                         <item.icon className="h-4 w-4 mr-3" />
                         {item.label}
