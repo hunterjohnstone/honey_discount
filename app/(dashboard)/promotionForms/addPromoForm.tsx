@@ -33,7 +33,7 @@ const promotionSchema = z.object({
     address: z.string(),
     latitude: z.number(),
     longitude: z.number()
-  }).nullable(),
+  }).required(() => {return 'Location is required'}),
   startDate: z.string()
     .optional()
     .refine(val => !val || !isNaN(new Date(val).getTime()), {
@@ -75,7 +75,7 @@ export default function AddPromoForm({ userId, onSuccess }: {
       price: '',
       oldPrice: '',
       imageUrl: "",
-      mapLocation: null
+      mapLocation: {}
     }
   });
   
@@ -298,33 +298,12 @@ export default function AddPromoForm({ userId, onSuccess }: {
 
             {/* Location and Dates */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* <div className="space-y-1">
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location*</label>
-                <select
-                  id="location"
-                  {...register('location')}
-                  className={`w-full px-3 py-2 border ${errors.location ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                >
-                  <option value="">Select location</option>
-                  <option value="granada">Granada</option>
-                  <option value="sevilla">Seville</option>
-                  <option value="madrid">Madrid</option>
-                  <option value="suburbs">Suburbs</option>
-                </select>
-                {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>}
-              </div> */}
-              {/* <div className="space-y-1">
-                <label className="block text-sm font-medium text-gray-700">{t("map_location")}</label>
-                <LocationFormWrapper 
-                  value={mapLocation}
-                  onChange={setMapLocation}
-                /> */}
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700">{t("map_location")}</label>
                 <AddressAutocomplete
                   accessToken="pk.eyJ1IjoiaHVudGVyam9obnN0MSIsImEiOiJjbWViYTE1ankwNjB2MmxzY3gxa3Vmejl1In0.SQ5RWVjg4F3Zycd_YTul1Q"
                   onSelect={handleAddressSelect}
-                  onError={(error) => console.error("Geocoder error:", error)}
+                  error={!!errors.mapLocation}
                 />
                 {formMapLocation?.latitude && (
                   <div className="text-sm text-gray-500">

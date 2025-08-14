@@ -3,8 +3,6 @@ import mapboxgl from "mapbox-gl";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 
-
-// types.ts
 export interface LocationResult {
   address: string;
   latitude: number;
@@ -14,18 +12,56 @@ export interface LocationResult {
 export type MapboxGeocoderEvent = {
   result: {
     place_name: string;
-    center: [number, number]; // [longitude, latitude]
+    center: [number, number];
   };
 };
 
-// Mapbox CSS overrides to match Tailwind
 const MAPBOX_CSS_OVERRIDES = `
   .mapboxgl-ctrl-geocoder {
     border-radius: 0.5rem !important;
-    border-color: #d1d5db !important;
+    border: 1px solid !important;
     box-shadow: none !important;
     width: 100% !important;
     font-size: 0.875rem !important;
+    height: 42px !important;
+    padding: 0 !important;
+    transition: all 0.2s !important;
+  }
+  .mapboxgl-ctrl-geocoder--input {
+    height: 100% !important;
+    padding: 0.5rem 2.5rem 0.5rem 0.75rem !important;
+    border-radius: 0.5rem !important;
+  }
+  .mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--pin-right > * {
+    position: absolute !important;
+    right: 0.75rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    margin-top: 0 !important;
+  }
+  .mapboxgl-ctrl-geocoder--icon-search {
+    left: auto !important;
+    right: 2.5rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+  .mapboxgl-ctrl-geocoder--icon-close {
+    width: 16px !important;
+    height: 16px !important;
+    margin-top: 0 !important;
+  }
+  .mapboxgl-ctrl-geocoder--button {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .mapboxgl-ctrl-geocoder--suggestions {
+    border-radius: 0.5rem !important;
+    margin-top: 0.25rem !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+  }
+  .mapboxgl-ctrl-geocoder.mapboxgl-ctrl-geocoder--collapsed {
+    width: 100% !important;
+    min-width: 100% !important;
   }
 `;
 
@@ -33,14 +69,23 @@ interface AddressAutocompleteProps {
   onSelect: (location: LocationResult) => void;
   onError?: (error: Error) => void;
   accessToken: string;
+  error?: boolean;
 }
 
-const AddressAutocomplete = ({ onSelect, accessToken }: AddressAutocompleteProps) => {
+const AddressAutocomplete = ({ 
+  onSelect, 
+  accessToken,
+  error = false 
+}: AddressAutocompleteProps) => {
   const geocoderContainerRef = useRef<HTMLDivElement>(null);
   const geocoderRef = useRef<MapboxGeocoder | null>(null);
 
   useEffect(() => {
     if (!geocoderContainerRef.current || geocoderRef.current) return;
+    // Inject the CSS overrides
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = MAPBOX_CSS_OVERRIDES;
+    document.head.appendChild(styleElement);
 
     const geocoder = new MapboxGeocoder({
       accessToken,
@@ -55,23 +100,25 @@ const AddressAutocomplete = ({ onSelect, accessToken }: AddressAutocompleteProps
       onSelect({ address: e.result.place_name, latitude, longitude });
     });
 
-    // Attach to container *once*
     geocoder.addTo(geocoderContainerRef.current);
     geocoderRef.current = geocoder;
 
     return () => {
-      geocoderRef.current?.off("result", () => {return null});
+      geocoderRef.current?.off("result", () => { return null });
       geocoderContainerRef.current?.removeChild(
         geocoderContainerRef.current.firstChild as Node
       );
+      document.head.removeChild(styleElement);
     };
-  }, [accessToken, onSelect]);
+  }, [accessToken, onSelect, error]);
 
   return (
     <div className="space-y-1">
-      <label className="block text-sm font-medium text-gray-700">Address *</label>
-      {/* Single container for Mapbox to inject into */}
-      <div ref={geocoderContainerRef} className="w-full" />
+      <div 
+        ref={geocoderContainerRef} 
+        className={`w-full ${error ? 'border-red-500' : 'border-gray-300'} rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500`}
+      />
+      {error && <p className="mt-1 text-sm text-red-600">Address is required</p>}
     </div>
   );
 };
