@@ -41,7 +41,6 @@ export default function PromotionPage() {
         throw new Error('Promotion not found');
       }
       setPromotion(promo);
-      console.log("map location is: ", JSON.stringify(promo.mapLocation));
     } catch (error) {
       console.error("Fetch error:", error);
     } finally {

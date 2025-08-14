@@ -133,8 +133,6 @@ export default function AddPromoForm({ userId, onSuccess }: {
       website: data.website,
       };
 
-      console.log("map location is: ", promotionToAdd.mapLocation);
-
       if (!promotionToAdd.imageUrl) {
         switch (promotionToAdd.category) {
           case 'food':
@@ -155,8 +153,6 @@ export default function AddPromoForm({ userId, onSuccess }: {
           default: promotionToAdd.imageUrl = 'https://media.istockphoto.com/id/1457385092/photo/an-asian-young-technician-service-man-wearing-blue-uniform-checking-cleaning-air-conditioner.jpg?s=612x612&w=0&k=20&c=Tqu5jMzD1TKFO1Fvow6d0JMDsEGU8T3kToP706bQFQI=';
         }
       };
-
-      console.log("entire promotion is: ", JSON.stringify(promotionToAdd))
 
       await fetch('/api/product/put_data', {
         method: 'POST',
@@ -301,7 +297,7 @@ export default function AddPromoForm({ userId, onSuccess }: {
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700">{t("map_location")}</label>
                 <AddressAutocomplete
-                  accessToken="pk.eyJ1IjoiaHVudGVyam9obnN0MSIsImEiOiJjbWViYTE1ankwNjB2MmxzY3gxa3Vmejl1In0.SQ5RWVjg4F3Zycd_YTul1Q"
+                  accessToken={process.env.NEXT_PUBLIC_MAP_TOKEN || ""}
                   onSelect={handleAddressSelect}
                   error={!!errors.mapLocation}
                 />
@@ -316,7 +312,6 @@ export default function AddPromoForm({ userId, onSuccess }: {
 
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Start Date - Optional */}
               <div className="space-y-1">
                 <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
                   {t("start_date")}

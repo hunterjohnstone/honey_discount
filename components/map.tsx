@@ -17,6 +17,7 @@ export function Map({ promotions }: { promotions: Promotion[] }) {
         center={[37.177336, -3.598557]} 
         zoom={13}
         style={{ height: '100%', width: '100%' }}
+        className='z-10'
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -34,13 +35,12 @@ export function Map({ promotions }: { promotions: Promotion[] }) {
                   href={{pathname: `/${promo.id}`}}
               >
               <div className="h-48 overflow-hidden relative">
-                <div className="absolute top-2 right-2 bg-red-600 text-white text-sm font-bold px-2.5 py-1 rounded-full z-10 shadow-md transform rotate-6 hover:rotate-0 transition-transform">
+                <div className="absolute top-2 right-2 bg-red-600 text-white text-sm font-bold px-2.5 py-1 rounded-full z-20 shadow-md transform rotate-6 hover:rotate-0 transition-transform">
                   {`${promo.discount} OFF`}
                 </div>
                 <img
                   src={promo.imageUrl}
                   alt={promo.title}
-                  // className="w-full h-full object-cover"
                 />
               </div>
                 <div className="p-4">
@@ -57,7 +57,6 @@ export function Map({ promotions }: { promotions: Promotion[] }) {
                     reviewCount={promo.numReviews} 
                     size="sm"
                   />
-                  {/* <p className="text-gray-600 mb-3 pt-2">{promo.description}</p> */}
                 </div>
               </Link>
 

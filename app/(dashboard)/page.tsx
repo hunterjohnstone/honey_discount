@@ -1,14 +1,12 @@
 "use client";
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
-import Error from 'next/error';
 import useSWR from 'swr';
 import { User } from '@/lib/db/schema';
 import Link from 'next/link';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom } from 'jotai';
 import { isAddingPromotionAtom } from './profile/atom_state';
 import { RatingDisplay } from './startDisplay';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Promotion } from './promotionForms/types';
 import AddPromoForm from './promotionForms/addPromoForm';
@@ -21,19 +19,21 @@ import { useTranslation } from '@/hooks/useTranslation';
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 const DiscoverPage = () => {
-  const router = useRouter();
 
   const {
     data: promotions,
+    allData,
     loading,
     error,
     pagination,
     fetchData,
-  } = usePromotions()
+    fetchAllData
+  } = usePromotions();
 
   const [filteredPromotions, setFilteredPromotions] = useState<Promotion[]>([]);
   const [isAddingPromotion, setIsAddingPromotion] = useAtom(isAddingPromotionAtom);
   const [showMapModal, setShowMapModal] = useState(false);
+  const [mapLoading, setMapLoading] = useState(false);
   
   //Allow calls to API and use user body
   const {data: user } = useSWR<User>('/api/user', fetcher)
@@ -42,7 +42,7 @@ const DiscoverPage = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200]);
   const [locationFilter, setLocationFilter] = useState<string>('all');
-
+  
   //filter modal
   const [showFiltersModal, setShowFiltersModal] = useState(false);
   const [minPrice, setMinPrice] = useState(0);
@@ -54,14 +54,28 @@ const DiscoverPage = () => {
   const t = useTranslation();
 
   useEffect(() => {
-    fetchData();
-    setFilteredPromotions(promotions)
-  }, []);
+    if (promotions.length > 0) {
+      setFilteredPromotions(promotions);
+    }
+
+  }, [promotions]);
 
   const handlePageChange = (page: number) => {
-    fetchData(page)
+    fetchData(page);
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  };
+
+  // When map button/feature is clicked
+  const handleMapClick = async () => {
+    setMapLoading(true);
+    try {
+      await fetchAllData();
+      setShowMapModal(true);
+    } finally {
+      setMapLoading(false);
+    }
+  };
+
 
   useEffect(() => {
     // Apply filters
@@ -92,7 +106,10 @@ const DiscoverPage = () => {
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">
               <Button
-                onClick={() => setShowMapModal(true)}
+                onClick={async () => {
+                  await handleMapClick();
+                  setShowMapModal(true);
+                }}
                 className="gap-2 cursor-pointer"
               >
                 <MapPinIcon className="w-4 h-4" />
@@ -353,7 +370,7 @@ const DiscoverPage = () => {
               </div>
               
               <div className="h-[70vh]">
-                <MapWrapper promotions={filteredPromotions} />
+                <MapWrapper promotions={allData} />
               </div>
               
               <div className="p-4 border-t flex justify-end">
@@ -368,9 +385,8 @@ const DiscoverPage = () => {
           </div>
         )}
 
-
         {/* TODO: Move this section to a seperate component (also put spinner in the center)  */}
-        {loading ? (
+        {loading.page ? (
           <div className="flex justify-center items-center h-screen">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>

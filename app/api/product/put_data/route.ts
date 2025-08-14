@@ -8,7 +8,6 @@ import { NextResponse } from 'next/server';
     try {
       const data = await request.json() as Promotion;
 
-      console.log(data.mapLocation);
       await db.insert(products).values({
         title: data.title,
         description: data.description,
