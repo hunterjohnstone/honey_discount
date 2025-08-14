@@ -61,6 +61,6 @@ export async function setSession(user: NewUser) {
     path: '/', // Explicit path
     expires: expiresInOneDay,
     maxAge: 60 * 60 * 24 * 7, // 1 week expiration
-    domain: isProduction ? '.https://spanishoffers.com' : undefined,
+    domain: isProduction ? '.spanishoffers.com' : undefined,
   });
 }
