@@ -17,12 +17,21 @@ export async function GET(request: Request) {
       offset: offset,
     }),
     db.select({ count: count() }).from(products)
-  ])
+  ]);
+
+  const filteredPromotions = promotions.filter((promotion) => {
+    // If the enddate exists and its earlier than current date dont add that promotion
+    if (promotion.endDate && new Date(promotion.endDate) <= new Date()) {
+      return;
+    }
+    return promotion;
+  })
+
 
   const totalCount = totalResult[0].count
 
   return NextResponse.json({
-    data: promotions,
+    data: filteredPromotions,
     pagination: {
       currentPage: page,
       totalPages: Math.ceil(totalCount / pageSize),

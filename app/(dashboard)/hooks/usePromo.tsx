@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Promotion } from '../promotionForms/types';
 
 //This has been updated so that it serves 
-export function usePromotions(initialPage = 1, pageSize = 12) {
+export function usePromotions(initialPage = 1, pageSize = 54) {
   const [paginatedData, setPaginatedData] = useState<Promotion[]>([]);
   const [allFilteredData, setAllFilteredData] = useState<Promotion[]>([]);
   const [loading, setLoading] = useState({
