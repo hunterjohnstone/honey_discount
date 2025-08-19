@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from "react";
-import mapboxgl from "mapbox-gl";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 
@@ -116,7 +115,7 @@ const AddressAutocomplete = ({
     <div className="space-y-1">
       <div 
         ref={geocoderContainerRef} 
-        className={`w-full ${error ? 'border-red-500' : 'border-gray-300'} rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500`}
+        className={`w-full ${error ? 'border-red-500' : 'border-gray-300'} rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 mapboxgl-ctrl-geocoder mapboxgl-ctrl-geocoder--input mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--pin-right mapboxgl-ctrl-geocoder--icon-search mapboxgl-ctrl-geocoder--icon-close mapboxgl-ctrl-geocoder--button mapboxgl-ctrl-geocoder--suggestions mapboxgl-ctrl-geocoder.mapboxgl-ctrl-geocoder--collapsed`}
       />
       {error && <p className="mt-1 text-sm text-red-600">Address is required</p>}
     </div>
