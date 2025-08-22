@@ -26,7 +26,6 @@ interface AddressAutocompleteProps {
 const AddressAutocomplete = ({ 
   onSelect, 
   accessToken,
-  error = false 
 }: AddressAutocompleteProps) => {
   const geocoderContainerRef = useRef<HTMLDivElement>(null);
   const geocoderRef = useRef<MapboxGeocoder | null>(null);
@@ -62,18 +61,17 @@ const AddressAutocomplete = ({
         geocoderContainerRef.current.removeChild(geocoderContainerRef.current.firstChild);
       }
     };
-  }, [mounted, accessToken, onSelect, error]);
+  }, [mounted, accessToken, onSelect]);
 
-    if (!mounted) return <div className="h-[42px]" />;
+    if (!mounted) return <div className="h-[42px]" ></div>;
 
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1 z-5">
       <div 
         ref={geocoderContainerRef} 
-        className={`w-full ${error ? 'border-red-500' : 'border-gray-300'}`}
+        className={'w-full border-gray-300 z-5'}
       />
-      {error && <p className="mt-1 text-sm text-red-600">Address is required</p>}
     </div>
   );
 };

@@ -15,6 +15,7 @@ import { usePromotions } from './hooks/usePromo';
 import MapWrapper from '@/components/mapWrapper';
 import { FilterIcon, MapPinIcon, StarIcon, XIcon } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
+import UUIDImage from '@/components/UuidImage';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -87,7 +88,7 @@ const DiscoverPage = () => {
       results = results.filter(p => p.location === locationFilter);
     }
 
-  results = results.filter(p => parseFloat(p.price) >= priceRange[0] && parseFloat(p.price) <= priceRange[1]);
+  results = results.filter(p => p.price ? parseFloat(p.price) >= priceRange[0] && parseFloat(p.price) <= priceRange[1] : p);
 
   if (ratingFilter) {
     results = results.filter(p => p.starAverage >= ratingFilter);
@@ -406,25 +407,36 @@ const DiscoverPage = () => {
                   className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow block h-full"
               >
               <div className="h-48 overflow-hidden relative">
+                {/* TODO: tech debt  - fix below. now it is stored in the DB as a string with percentage not good*/}
+                {promotion.discount !== 'NaN%' && (
                 <div className="absolute top-2 right-2 bg-red-600 text-white text-sm font-bold px-2.5 py-1 rounded-full z-10 shadow-md transform rotate-6 hover:rotate-0 transition-transform">
                   {`${promotion.discount} ${t('off')}`}
                 </div>
-                <img
-                  src={promotion.imageUrl}
-                  alt={promotion.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+                ) }
+                  <UUIDImage
+                    uuid={promotion.imageLocation!}
+                    alt={promotion.title}
+                    width={300}
+                    height={200}
+                    className="w-full h-full object-cover"
+                    fallbackSrc="/default-product.jpg"
+                  />
+                </div>
                 <div className="p-4">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-xl font-semibold text-gray-800">{promotion.title}</h3>
                     <div className="flex items-center gap-2">
+                      {promotion.oldPrice && (
                       <span className="text-gray-700 line-through text-md">
                         €{promotion.oldPrice}
                       </span>
+                      )}
+                      {/* TODO: tech debt below. need to fix 'price' defualt value. This will work for now butthis logic is counter-intuitive */}
+                      {(promotion.price || promotion.oldPrice) && (
                       <span className="bg-green-100 text-green-800 px-2 py-1 rounded-lg font-medium text-sm">
                         €{promotion.price}
                       </span>
+                      )}
                     </div>
                   </div>
                   <RatingDisplay 
@@ -437,9 +449,6 @@ const DiscoverPage = () => {
                     <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
                       {promotion.category}
                     </span>
-                    {/* <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
-                      {promotion.location}
-                    </span> */}
                     {
                       promotion.endDate &&
                       <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">

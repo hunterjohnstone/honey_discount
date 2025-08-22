@@ -13,6 +13,7 @@ import EditPromotion from '../promotionForms/editPromotion';
 import { Promotion } from '../promotionForms/types';
 import AddPromoForm from '../promotionForms/addPromoForm';
 import { toast } from 'react-toastify';
+import UUIDImage from '@/components/UuidImage';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -40,6 +41,7 @@ export default function ProfilePage() {
     starAverage: 0,
     userId: 1,
     longDescription: "",
+    imageLocation: undefined,
     discount: "0%",
     oldPrice: "0.0",
     website: "",
@@ -229,11 +231,16 @@ const {data: user } = useSWR<User>('/api/user', fetcher);
                     <CardDescription>{promotion.category}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <img
-                      src={promotion.imageUrl}
-                      alt={promotion.title}
-                      className="w-full h-48 object-cover rounded-lg mb-4"
-                    />
+                    <div className="h-48 overflow-hidden relative">
+                        <UUIDImage
+                          uuid={promotion.imageLocation!}
+                          alt={promotion.title}
+                          width={300} // Optimal size for your grid
+                          height={200}
+                          className="w-full h-full object-cover"
+                          fallbackSrc="/default-product.jpg"
+                        />
+                      </div>
                     <p className="text-gray-700">{promotion.description}</p>
                     <div className="mt-4 flex justify-between items-center">
                       <span className="text-lg font-bold">€{promotion.price}</span>

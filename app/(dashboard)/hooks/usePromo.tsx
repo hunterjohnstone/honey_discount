@@ -30,7 +30,9 @@ export function usePromotions(initialPage = 1, pageSize = 54) {
         totalPages: result.pagination.totalPages,
         totalItems: result.pagination.totalItems,
       });
+
       return result.data; // Return the fetched data
+
     } catch (err) {
       setError("Error getting page data");
       return []; // Return empty array on error

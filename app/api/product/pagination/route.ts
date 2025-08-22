@@ -21,11 +21,12 @@ export async function GET(request: Request) {
 
   const filteredPromotions = promotions.filter((promotion) => {
     // If the enddate exists and its earlier than current date dont add that promotion
-    if (promotion.endDate && new Date(promotion.endDate) <= new Date()) {
+    if ((promotion.endDate) && (new Date(promotion.endDate) <= new Date())) {
       return;
     }
     return promotion;
   })
+
 
 
   const totalCount = totalResult[0].count

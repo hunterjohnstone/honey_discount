@@ -9,6 +9,9 @@ import { toast } from 'react-toastify';
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import { useTranslation } from '@/hooks/useTranslation';
 import AddressAutocomplete, { LocationResult } from './addressPicker';
+import AddImage from '@/components/addImage';
+import { useCallback, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 const safeDateDisplay = (dateString: string | undefined, fallback = '') => {
   if (!dateString) return fallback;
@@ -25,15 +28,15 @@ const promotionSchema = z.object({
   category: z.string().min(1, 'Category is required'),
   description: z.string().min(1, 'Description is required').max(100, "Brief description is maximum 100 characters"),
   longDescription: z.string().min(1, 'Detailed description is required'),
-  price: z.string().min(1, 'Price is required').regex(/^\d*\.?\d{0,2}$/, 'Invalid price format (e.g. 12.99)'),
-  oldPrice: z.string().min(1, 'Original price is required').regex(/^\d*\.?\d{0,2}$/, 'Invalid price format (e.g. 24.99)'),
-  location: z.string().min(1, 'Location is required'),
+  price: z.string().regex(/^\d*\.?\d{0,2}$/, 'Invalid price format (e.g. 12.99)'),
+  oldPrice: z.string().regex(/^\d*\.?\d{0,2}$/, 'Invalid price format (e.g. 24.99)'),
+  location: z.string(),
   website: z.string(),
   mapLocation: z.object({
     address: z.string(),
     latitude: z.number(),
     longitude: z.number()
-  }).required(() => {return 'Location is required'}),
+  }).optional(),
   startDate: z.string()
     .optional()
     .refine(val => !val || !isNaN(new Date(val).getTime()), {
@@ -44,14 +47,14 @@ const promotionSchema = z.object({
     .refine(val => !val || !isNaN(new Date(val).getTime()), {
       message: "Invalid end date",
     }),
-  imageUrl: z.string(),
+  imageLocation: z.string().min(1, 'Image is required'), // Add validation for image
 }).refine(
   data => !data.endDate || !data.startDate || new Date(data.endDate) >= new Date(data.startDate),
   {
     message: "End date must be after start date",
     path: ["endDate"],
   }
-);;
+);
 
 type PromotionFormData = z.infer<typeof promotionSchema>;
 
@@ -74,14 +77,40 @@ export default function AddPromoForm({ userId, onSuccess }: {
       ...basePromoObject,
       price: '',
       oldPrice: '',
-      imageUrl: "",
-      mapLocation: {}
+      mapLocation: undefined
     }
   });
   
-  const formMapLocation = watch("mapLocation");
+  // const formMapLocation = watch("mapLocation");
+  const [imageLocationUuid, setImageLocationUuid ] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const t = useTranslation()
+
+  const t = useTranslation();
+
+  const handleImageSelect = (file: File) => {
+    setImageFile(file);
+    
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    
+    // Generate UUID for this image
+    const newUuid = uuidv4();
+    setImageLocationUuid(newUuid);
+    setValue('imageLocation', newUuid, { shouldValidate: true });
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    setImageLocationUuid('');
+    setValue('imageLocation', '', { shouldValidate: true });
+  };
+
 
   const handlePriceChange = (field: 'price' | 'oldPrice', e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -92,16 +121,42 @@ export default function AddPromoForm({ userId, onSuccess }: {
     }
   };
 
-  const handleAddressSelect = (result: LocationResult) => {
-    setValue("mapLocation", {
-      address: result.address,
-      latitude: result.latitude,
-      longitude: result.longitude
-    }, { shouldValidate: true });
-  };
+  const handleAddressSelect = useCallback((result: LocationResult | null) => {
+    if (result) {
+      setValue("mapLocation", {
+        address: result.address,
+        latitude: result.latitude,
+        longitude: result.longitude
+      }, { shouldValidate: true });
+    } else {
+      // Clear the mapLocation if needed
+      setValue("mapLocation", undefined, { shouldValidate: true });
+    }
+  }, [setValue]);
 
   const onSubmit = async (data: PromotionFormData) => {
     try {
+
+      if (!imageFile || !imageLocationUuid) {
+        trigger('imageLocation');
+        toast.error('Please upload an image');
+        return;
+      }
+    
+      const formData = new FormData();
+      formData.append('file', imageFile);
+      formData.append('title', imageLocationUuid);
+      console.log("about to submit")
+      const reponse = await fetch('/api/upload-file', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!reponse.ok) {
+        toast.error('Image failed to upload');
+        throw new Error('Image upload failed');
+      }
+
       // Convert string prices to numbers
       const priceValue = parseFloat(data.price);
       const oldPriceValue = parseFloat(data.oldPrice);
@@ -117,23 +172,24 @@ export default function AddPromoForm({ userId, onSuccess }: {
         title: data.title,
         description: data.description,
         longDescription: data.longDescription,
-        price: data.price,
-        oldPrice: data.oldPrice,
+        price: data.price || undefined,
+        oldPrice: data.oldPrice || undefined,
         discount: discount + "%",
         category: data.category,
         startDate: data.startDate,
         endDate: data.endDate,
         location: data.location,
-        imageUrl: data.imageUrl || undefined,
+        imageUrl: undefined,
         userId,
         isActive: true,
       mapLocation: (data.mapLocation 
         ? [data.mapLocation.latitude, data.mapLocation.longitude] 
         : undefined),
       website: data.website,
+      imageLocation: imageLocationUuid,
       };
 
-      if (!promotionToAdd.imageUrl) {
+      if (!promotionToAdd.imageLocation) {
         switch (promotionToAdd.category) {
           case 'food':
             promotionToAdd.imageUrl = 'https://images.unsplash.com/photo-1551218808-94e220e084d2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
@@ -166,6 +222,7 @@ export default function AddPromoForm({ userId, onSuccess }: {
       router.refresh();
       setIsAddingPromotion(false);
     } catch (error) {
+      toast.error("failed to submit Please check all fields are correct.")
       console.error('Error creating promotion:', error);
     }
   };
@@ -299,14 +356,9 @@ export default function AddPromoForm({ userId, onSuccess }: {
                 <AddressAutocomplete
                   accessToken={process.env.NEXT_PUBLIC_MAP_TOKEN || ""}
                   onSelect={handleAddressSelect}
-                  error={!!errors.mapLocation}
+                  // error={!!errors.mapLocation}
                 />
-                {formMapLocation?.latitude && (
-                  <div className="text-sm text-gray-500">
-                    Coordinates: {formMapLocation.latitude.toFixed(8)}, {formMapLocation.longitude.toFixed(8)}
-                  </div>
-                )}
-                <input type="hidden" {...register("mapLocation")} />
+                {/* <input type="hidden" {...register("mapLocation")} /> */}
               </div>
             </div>
 
@@ -381,13 +433,12 @@ export default function AddPromoForm({ userId, onSuccess }: {
             </div>
           )}
             {/* Image URL */}
-            <div className="space-y-1">
+            {/* <div className="space-y-1">
               <div className="flex items-center">
                 <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">
                   {t("image_url")}
                 </label>
                 <div className="group relative ml-2 inline-flex">
-                  {/* Info icon */}
                   <button
                     type="button"
                     aria-label="Image URL information"
@@ -407,7 +458,6 @@ export default function AddPromoForm({ userId, onSuccess }: {
                     </svg>
                   </button>
                   
-                  {/* Tooltip */}
                   <div className="absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 transform px-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 sm:bottom-auto sm:left-full sm:top-1/2 sm:mb-0 sm:ml-2 sm:-translate-y-1/2">
                     <div className="w-64 rounded-lg bg-gray-700 px-3 py-2 text-xs text-white shadow-lg">
                       <p>{t('image_url_info')}</p>
@@ -427,6 +477,22 @@ export default function AddPromoForm({ userId, onSuccess }: {
                 placeholder={t("example_image")}
                 aria-describedby="imageUrlHelp"
               />
+            </div> */}
+            <div className="space-y-1">
+              <AddImage
+                onImageSelect={handleImageSelect}
+                onRemoveImage={removeImage}
+                disabled={isSubmitting}
+                previewUrl={imagePreview}
+              />
+              <input
+                type="hidden"
+                {...register('imageLocation')}
+                value={imageLocationUuid}
+              />
+              {errors.imageLocation && (
+                <p className="mt-1 text-sm text-red-600">{errors.imageLocation.message}</p>
+              )}
             </div>
             <div className="space-y-1">
               <label htmlFor="website" className="block text-sm font-medium text-gray-700">{t("website")}*</label>
@@ -441,7 +507,7 @@ export default function AddPromoForm({ userId, onSuccess }: {
           </div>
 
           {/* Footer */}
-          <div className="sticky bottom-0 border-t bg-white rounded-b-xl border-gray-200 p-4">
+          <div className="sticky bottom-0 border-t bg-white rounded-b-xl border-gray-200 p-4 z-20">
             <div className="flex justify-end space-x-3">
               <button
                 type="button"

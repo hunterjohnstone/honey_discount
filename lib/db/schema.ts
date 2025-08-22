@@ -18,7 +18,7 @@ export const products = pgTable('products', {
   id: serial('id').primaryKey(),
   title: varchar('title', {length: 100}),
   description: varchar('description', {length: 100}),
-  price: numeric('price').default("0.0"),
+  price: numeric('price'),
   oldPrice: numeric('old_price'),
   discount: varchar('discount'),
   longDescription: varchar('long_description'),
@@ -29,6 +29,7 @@ export const products = pgTable('products', {
   startDate: varchar('start_date', {length: 100}),
   endDate: varchar('end_date', {length: 100}),
   location: varchar('location', {length: 100}),
+  imageLocation: varchar('image_location'),
   isActive: boolean('is_active'),
   reported: varchar('reported').default('[]'),
   userId: integer('user_id').notNull().references(() => users.id), // ID of the user that added it

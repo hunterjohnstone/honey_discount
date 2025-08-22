@@ -11,6 +11,7 @@ import MapWrapper from '@/components/mapWrapper';
 import { useTranslation } from '@/hooks/useTranslation';
 import useSWR from 'swr';
 import { User } from '@/lib/db/schema';
+import UUIDImage from '@/components/UuidImage';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -73,9 +74,11 @@ export default function PromotionPage() {
     <span className="text-gray-600">{t('discovery')}</span>
   </div>
 
-  <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-    <div className="h-64 overflow-hidden relative">
+  <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="relative w-full overflow-hidden">
 
+      {/* if theres a discouhnt display the red flag */}
+      {promotion.discount !== "NaN%" && (
       <div className="absolute top-4 right-4 bg-gradient-to-r from-red-600 to-red-500 text-white font-bold px-3 py-2 rounded-md shadow-lg z-10 transform rotate-3 hover:rotate-0 transition-transform">
         <div className="flex items-center gap-1">
           <span className="text-sm">{t('save')}</span>
@@ -83,11 +86,25 @@ export default function PromotionPage() {
         </div>
         <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-700 rotate-45 transform -z-10"></div>
       </div>
-      <img
+      )}
+      <div className="w-full" style={{ maxHeight: '400px' }}>
+        <UUIDImage
+          uuid={promotion.imageLocation!}
+          alt={promotion.title}
+          fill
+          // width={300}
+          // height={200} // 800x533 maintains 3:2 ratio
+          className="w-full h-full object-cover"
+          fallbackSrc="/default-product.jpg"
+        />
+        </div>
+      </div>
+
+      {/* <img
         src={promotion.imageUrl}
         alt={promotion.title}
         className="w-full h-full object-cover"
-      />
+      /> */}
     </div>
               
     <div className="p-4 sm:p-6">
@@ -173,7 +190,6 @@ export default function PromotionPage() {
             </p>
           )}
         </div>
-      </div>
     </div>
 
     {promotion.mapLocation !== null && <MapWrapper promotions={[promotion]}/>}

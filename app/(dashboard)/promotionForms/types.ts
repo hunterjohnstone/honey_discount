@@ -1,5 +1,3 @@
-import { AnyActionArg } from "react";
-
 export type InputPromotionSchema = {
     id: string;
     title: string;
@@ -24,8 +22,8 @@ export type InputPromotionSchema = {
     id: string;
     title: string;
     description: string;
-    price: string;
-    oldPrice: string;
+    price: string | undefined;
+    oldPrice: string | undefined;
     imageUrl: string | undefined;
     category: string;
     startDate: string | undefined;
@@ -40,6 +38,7 @@ export type InputPromotionSchema = {
     longDescription: string;
     discount: string;
     website: string | undefined
+    imageLocation: string | undefined;
   };
 
   export const basePromoObject: Promotion = {
@@ -57,9 +56,10 @@ export type InputPromotionSchema = {
     starAverage: 0,
     numReviews: 0,
     longDescription: "",
-    mapLocation:[0,0],
+    mapLocation: undefined,
     isActive: true,
     discount: "0%",
     oldPrice: "",
     website: undefined,
+    imageLocation: undefined,
   };

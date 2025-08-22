@@ -21,6 +21,7 @@ import { NextResponse } from 'next/server';
         discount: data.discount,
         longDescription: data.longDescription,
         location: data.location,
+        imageLocation: data.imageLocation,
         isActive: true,
         userId: data.userId,
         website: data.website,
