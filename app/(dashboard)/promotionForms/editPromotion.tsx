@@ -9,12 +9,12 @@ export default function EditPromotion({ promotionToEdit, onSuccess } : {
     onSuccess: () => void
 }) {
     // const router = useRouter();
-    const [price, setPrice] = useState<string>(promotionToEdit.price);
+    const [price, setPrice] = useState<string | undefined>(promotionToEdit.price);
     const [error, setError] = useState<string | null>(null);
     const setIsEditingPromotion = useSetAtom(isEditingPromotionAtom);
     const [promotion, setPromotion] = useState<Omit<Promotion,| 'isActive' | 'string' >>({
         ...promotionToEdit,
-        price: promotionToEdit.price.toString(),
+        price: promotionToEdit.price ? promotionToEdit.price.toString() : undefined,
     });
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
