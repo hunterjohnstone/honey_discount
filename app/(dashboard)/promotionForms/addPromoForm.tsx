@@ -228,25 +228,25 @@ export default function AddPromoForm({ userId, onSuccess }: {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl border border-gray-100 flex flex-col max-h-[90vh]">
-        {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-gray-200 sticky top-0 z-10">
-          <h2 className="text-2xl font-bold text-gray-800">{t('create_promotion')}</h2>
-          <button
-            onClick={() => setIsAddingPromotion(false)}
-            className="cursor-pointer text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1"
-            aria-label="Close"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="relative flex-1 overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-          <div className="p-6 space-y-5 pb-8">
+<div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+  <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl border border-gray-100 flex flex-col max-h-[90vh]">
+    {/* Header - Fixed height */}
+    <div className="flex-shrink-0 flex justify-between items-center p-6 border-b border-gray-200 bg-white rounded-t-xl">
+      <h2 className="text-2xl font-bold text-gray-800">{t('create_promotion')}</h2>
+      <button
+        onClick={() => setIsAddingPromotion(false)}
+        className="cursor-pointer text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1"
+        aria-label="Close"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    {/* Form */}
+    <div className="flex-1 overflow-y-auto">
+    <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+      <div className="p-6 space-y-5 pb-8">
             {/* Title and Category */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-1">
@@ -536,6 +536,7 @@ export default function AddPromoForm({ userId, onSuccess }: {
             </div>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );

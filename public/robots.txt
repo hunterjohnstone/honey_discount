@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
 
-# Sitemaps
-Sitemap: https://honeydiscounts.com//sitemap.xml
+Sitemap: https://www.spanishoffers.com/sitemap.xml
