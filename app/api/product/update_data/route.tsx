@@ -12,7 +12,7 @@ export async function PUT(request: Request) {
         .set({
           title: result.title,
           description: result.description,
-          price: result.price.toString(),
+          price: result.price?.toString(),
           imageUrl: result.imageUrl,
           category: result.category,
           startDate: result.startDate,
