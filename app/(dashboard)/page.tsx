@@ -1,15 +1,9 @@
 // app/discover/page.tsx
-
 import { db } from '@/lib/db/drizzle';
 import { asc } from 'drizzle-orm';
 import { products } from '@/lib/db/schema';
 import { sql } from 'drizzle-orm';
 import DiscoverClient from './discoverClient';
-
-// Remove the PageProps interface and use SearchParams instead
-interface SearchParams {
-  page?: string;
-}
 
 // Server-side data fetching
 async function getData(page: number = 1, pageSize: number = 54) {
@@ -64,14 +58,14 @@ async function getData(page: number = 1, pageSize: number = 54) {
   }
 }
 
-// Use the correct props structure for App Router
-export default async function DiscoverPage({ 
-  searchParams 
-}: { 
-  searchParams: Promise<SearchParams> | SearchParams 
+// CORRECT: searchParams is always a Promise in Next.js 14+ App Router
+export default async function DiscoverPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
 }) {
-  // Handle both Promise and non-Promise searchParams
-  const params = searchParams instanceof Promise ? await searchParams : searchParams;
+  // Await the searchParams promise
+  const params = await searchParams;
   const page = params.page ? parseInt(params.page) : 1;
   
   const promotionsData = await getData(page);
@@ -79,5 +73,17 @@ export default async function DiscoverPage({
   return <DiscoverClient initialData={promotionsData} />;
 }
 
-// If you're using dynamic exports for older Next.js versions
-export const dynamic = 'force-dynamic'; // Optional: if you need dynamic rendering
+// Optional: Generate metadata if needed
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const page = params.page ? parseInt(params.page) : 1;
+  
+  return {
+    title: `Discover Promotions - Page ${page}`,
+    description: 'Encuentra las últimas promociones y ofertas en Granada | Find the latest promotions and deals in Granada',
+  };
+}
