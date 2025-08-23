@@ -192,7 +192,7 @@ export default function PromotionPage() {
         </div>
     </div>
 
-    {promotion.mapLocation !== null && <MapWrapper promotions={[promotion]}/>}
+    {promotion.mapLocation !== null && <MapWrapper promotions={[promotion]} showLink={false}/>}
   </div>
   <ReviewForm productId={parseInt(promotion.id)}></ReviewForm>
   <ReportForm productId={parseInt(promotion.id)} ></ReportForm>

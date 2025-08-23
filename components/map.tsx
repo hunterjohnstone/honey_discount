@@ -10,7 +10,7 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { useState } from 'react'
 import { generateMapLinks } from './mapLink'
 
-export function Map({ promotions }: { promotions: Promotion[] }) {
+export function Map({ promotions, showLink }: { promotions: Promotion[], showLink: boolean }) {
   const t = useTranslation();
   const markerIcon = createLucideMarkerIcon('#FF0000')
   const [showMapOptions, setShowMapOptions] = useState<{lat: number, lng: number, label: string} | null>(null)
@@ -36,6 +36,8 @@ export function Map({ promotions }: { promotions: Promotion[] }) {
             >
               <Popup>
                 <div className="w-50"> {/* Reduced from w-64 */}
+                  {showLink && (
+
                   <Link
                     href={{pathname: `/${promotion.id}`}}
                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow block"
@@ -85,7 +87,7 @@ export function Map({ promotions }: { promotions: Promotion[] }) {
                       />
                     </div>
                   </Link>
-                  
+                  )}
                   {/* Open in Maps Button - smaller */}
                   <button
                     onClick={(e) => {

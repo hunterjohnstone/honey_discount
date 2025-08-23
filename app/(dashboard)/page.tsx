@@ -371,7 +371,7 @@ const DiscoverPage = () => {
               </div>
               
               <div className="h-[70vh]">
-                <MapWrapper promotions={allData} />
+                <MapWrapper promotions={allData} showLink={true}/>
               </div>
               
               <div className="p-4 border-t flex justify-end">
