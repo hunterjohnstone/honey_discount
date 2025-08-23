@@ -162,7 +162,7 @@ interface ProductReport {
   report: string;
 }
 
-const parseReported = (reportedString: string) => {
+export const parseReported = (reportedString: string) => {
   if (!reportedString?.trim()) return [];
   
   try {

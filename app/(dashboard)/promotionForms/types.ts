@@ -41,6 +41,30 @@ export type InputPromotionSchema = {
     imageLocation: string | undefined;
   };
 
+  export type LoosePromotion = {
+      id: number;
+      createdAt: Date;
+      updatedAt: Date;
+      category: string | null;
+      title: string | null;
+      discount: string | null;
+      description: string | null;
+      location: string | null;
+      website: string | null;
+      userId: number;
+      mapLocation: [number, number] | null;
+      endDate: string | null;
+      longDescription: string | null;
+      price: string | null;
+      isActive: boolean | null;
+      oldPrice: string | null;
+      imageUrl: string | null;
+      startDate: string | null;
+      starAverage: number;
+      numReviews: number;
+      imageLocation: string | null;
+  }
+
   export const basePromoObject: Promotion = {
     id: '',
     userId: 1,
