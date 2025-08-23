@@ -135,5 +135,6 @@
     "settings": "Configuración",
     "sign_out": "Cerrar Sesión",
     "account_settings": "Configuraciónes",
-    "image_url_info":"Puede pegar una URL de una imagen en línea o dejarla vacía y seleccionaremos automáticamente una imagen adecuada según la categoría."
+    "image_url_info":"Puede pegar una URL de una imagen en línea o dejarla vacía y seleccionaremos automáticamente una imagen adecuada según la categoría.",
+    "open_in_maps": "Abrir la mapa"
 }
