@@ -474,7 +474,7 @@ const DiscoverClient = ({ initialData }: DiscoverClientProps) => {
                           </div>
                         </div>
                         <RatingDisplay
-                          averageRating={promotion.starAverage || 5} 
+                          averageRating={promotion.starAverage} 
                           reviewCount={promotion.numReviews} 
                           size="sm"
                         />

@@ -12,7 +12,6 @@ async function getData(page: number = 1, pageSize: number = 54) {
   try {
     // Fetch paginated products directly from database
     const promotions = await db.query.products.findMany({
-      orderBy: asc(products.createdAt),
       limit: pageSize,
       offset: offset,
     });
