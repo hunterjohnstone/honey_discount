@@ -1,11 +1,14 @@
+// app/discover/page.tsx
+
 import { db } from '@/lib/db/drizzle';
-import { asc, sql } from 'drizzle-orm';
+import { asc } from 'drizzle-orm';
 import { products } from '@/lib/db/schema';
-import { parseReported } from '@/lib/db/queries';
+import { sql } from 'drizzle-orm';
 import DiscoverClient from './discoverClient';
 
-interface PageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+// Remove the PageProps interface and use SearchParams instead
+interface SearchParams {
+  page?: string;
 }
 
 // Server-side data fetching
@@ -26,10 +29,18 @@ async function getData(page: number = 1, pageSize: number = 54) {
     const totalPages = Math.ceil(totalItems / pageSize);
 
     // Parse reported field for each product
+    const parseReported = (reported: string | null) => {
+      try {
+        return reported ? JSON.parse(reported) : [];
+      } catch {
+        return [];
+      }
+    };
+
     const parsedPromotions = promotions.map((product) => ({
-        ...product,
-        reported: parseReported(product.reported || "[]"),
-        starAverage: parseFloat(product.starAverage)
+      ...product,
+      reported: parseReported(product.reported || "[]"),
+      starAverage: parseFloat(product.starAverage),
     }));
 
     return {
@@ -53,9 +64,20 @@ async function getData(page: number = 1, pageSize: number = 54) {
   }
 }
 
-export default async function DiscoverPage({ searchParams }: PageProps) {
-  const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page) : 1;
+// Use the correct props structure for App Router
+export default async function DiscoverPage({ 
+  searchParams 
+}: { 
+  searchParams: Promise<SearchParams> | SearchParams 
+}) {
+  // Handle both Promise and non-Promise searchParams
+  const params = searchParams instanceof Promise ? await searchParams : searchParams;
+  const page = params.page ? parseInt(params.page) : 1;
+  
   const promotionsData = await getData(page);
   
   return <DiscoverClient initialData={promotionsData} />;
 }
+
+// If you're using dynamic exports for older Next.js versions
+export const dynamic = 'force-dynamic'; // Optional: if you need dynamic rendering
