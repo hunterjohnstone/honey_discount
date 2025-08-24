@@ -397,7 +397,7 @@ export default function AddPromoForm({ userId, onSuccess }: {
               <div className="space-y-1">
                 <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
                   {t("end_date")}
-                  <span className="ml-1 text-xs text-gray-500">({t("must_be_after")}" "{safeDateDisplay(watch('startDate'), 'start date')})</span>
+                  <span className="ml-1 text-xs text-gray-500">({t("must_be_after")} {safeDateDisplay(watch('startDate'), 'start date')})</span>
                 </label>
                 <div className="relative">
                   <input
