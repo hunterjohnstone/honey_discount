@@ -94,22 +94,33 @@ const DiscoverClient = ({ initialData }: DiscoverClientProps) => {
   const fetchAllData = async () => {
     if (allData.length > 0) return allData;
     
-    setLoading(prev => ({ ...prev, all: true }));
+    setLoading(prev => ({...prev, all: true}));
     try {
-      const response = await fetch('/api/product/all');
-      if (!response.ok) throw new Error('Failed to fetch all data');
-      const result = await response.json();
-      
-      setAllData(result.data);
-      return result.data;
+      let allData: Promotion[] = [];
+      let currentPage = 1;
+      let totalPages = 1;
+
+      // First fetch to get total pages
+      const firstPage = await fetchData(1);
+      allData = [...firstPage];
+      totalPages = pagination.totalPages;
+
+      // Fetch remaining pages
+      while (currentPage < totalPages) {
+        currentPage++;
+        const nextPage = await fetchData(currentPage);
+        allData = [...allData, ...nextPage];
+      }
+
+      setAllData(allData);
+      return allData;
     } catch (err) {
-      console.error("Error getting all data:", err);
       return [];
     } finally {
-      setLoading(prev => ({ ...prev, all: false }));
+      fetchData(pagination.currentPage);
+      setLoading(prev => ({...prev, all: false}));
     }
   };
-
   // When map button/feature is clicked
   const handleMapClick = async () => {
     setMapLoading(true);
@@ -408,9 +419,8 @@ const DiscoverClient = ({ initialData }: DiscoverClientProps) => {
               </div>
               
               <div className="h-[70vh]">
-                <MapWrapper promotions={allData} />
+                <MapWrapper promotions={allData} showLink={true}/>
               </div>
-              
               <div className="p-4 border-t flex justify-end">
                 <button
                   onClick={() => setShowMapModal(false)}
