@@ -126,7 +126,7 @@ export function Map({ promotions, showLink }: { promotions: Promotion[], showLin
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg border transition-colors"
               >
-                <img src="/google.png" alt="Google Maps" className="w-6 h-6" />
+                <img src="/images/google.png" alt="Google Maps" className="w-6 h-6" />
                 <span>Google Maps</span>
               </a>
               
@@ -136,7 +136,7 @@ export function Map({ promotions, showLink }: { promotions: Promotion[], showLin
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg border transition-colors"
               >
-                <img src="/apple.png" alt="Apple Maps" className="w-6 h-6" />
+                <img src="/images/apple.png" alt="Apple Maps" className="w-6 h-6" />
                 <span>Apple Maps</span>
               </a>
             </div>

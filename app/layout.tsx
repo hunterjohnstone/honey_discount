@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   description: 'Encuentra las mejores ofertas y descuentos en Granada! \n "Find the best offers and discounts in Granada ',
   icons: {
     icon: [
-      { url: '../public/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon.svg', sizes: 'any' },
       { url: '/apple-touch-icon.png', rel: 'apple-touch-icon' },
     ],
   },
