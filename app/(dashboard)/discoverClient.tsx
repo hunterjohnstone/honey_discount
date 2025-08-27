@@ -1,4 +1,3 @@
-// app/discover/DiscoverClient.tsx
 "use client";
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
@@ -12,11 +11,12 @@ import MapWrapper from '@/components/mapWrapper';
 import { FilterIcon, MapPinIcon, StarIcon, XIcon } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import UUIDImage from '@/components/UuidImage';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { redirect, useRouter, useSearchParams } from 'next/navigation';
 import { LoosePromotion, Promotion } from './promotionForms/types';
 import { isAddingPromotionAtom } from './profile/atom_state';
 import AddPromoForm from './promotionForms/addPromoForm';
 import { RatingDisplay } from './startDisplay';
+import { toast } from 'react-toastify';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -131,6 +131,10 @@ const DiscoverClient = ({ initialData }: DiscoverClientProps) => {
       setMapLoading(false);
     }
   };
+  const handleUploadRedirect = () => {
+    toast.info("You need to be logged in to add an offer. Don't worry, its free and quick!")
+    redirect('/sign-up');
+  }
 
   useEffect(() => {
     // Apply filters
@@ -176,11 +180,10 @@ const DiscoverClient = ({ initialData }: DiscoverClientProps) => {
               {t('map')}
             </Button>
           </div>
-          {user && (
-            <Button onClick={() => (setIsAddingPromotion(true))} className='cursor-pointer'>
+            <Button onClick={() => user ? (setIsAddingPromotion(true)) : handleUploadRedirect()} className='cursor-pointer'>
               {t("add new promotion")}
             </Button>
-          )}
+
         </div>
 
         {/* Rest of your component remains the same from here */}
