@@ -1,8 +1,7 @@
 // app/discover/page.tsx
 import { db } from '@/lib/db/drizzle';
-import { asc } from 'drizzle-orm';
 import { products } from '@/lib/db/schema';
-import { sql } from 'drizzle-orm';
+import { desc, sql } from 'drizzle-orm';
 import DiscoverClient from './discoverClient';
 
 // Server-side data fetching
@@ -14,6 +13,7 @@ async function getData(page: number = 1, pageSize: number = 54) {
     const promotions = await db.query.products.findMany({
       limit: pageSize,
       offset: offset,
+      orderBy: desc(products.starAverage), // Order by star_rating descending (five stars first)
     });
     
     // Get total count for pagination
@@ -57,7 +57,6 @@ async function getData(page: number = 1, pageSize: number = 54) {
   }
 }
 
-// CORRECT: searchParams is always a Promise in Next.js 14+ App Router
 export default async function DiscoverPage({
   searchParams,
 }: {
